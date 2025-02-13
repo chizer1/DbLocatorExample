@@ -20,6 +20,7 @@ export interface Database {
   /** @format int32 */
   id?: number;
   name?: string | null;
+  user?: string | null;
   type?: DatabaseType;
   server?: DatabaseServer;
   status?: Status;
@@ -420,11 +421,13 @@ export class Api<
       query: {
         databaseName: string;
         databaseUser: string;
+        databasePassword: string;
         /** @format int32 */
         databaseServerId: number;
         /** @format int32 */
         databaseTypeId: number;
         databaseStatus: Status;
+        createDatabase: boolean;
       },
       params: RequestParams = {}
     ) =>
@@ -465,6 +468,7 @@ export class Api<
         databaseId: number;
         databaseName: string;
         databaseUser: string;
+        databaseUserPassword: string;
         /** @format int32 */
         databaseServerId: number;
         /** @format int32 */

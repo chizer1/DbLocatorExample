@@ -153,6 +153,7 @@ function AddDatabaseModal({
 }) {
   const [databaseName, setDatabaseName] = useState("");
   const [databaseUser, setDatabaseUser] = useState("");
+  const [databaseUserPassword, setDatabaseUserPassword] = useState("");
   const [databaseTypeId, setDatabaseTypeId] = useState<number | null>(null);
   const [databaseServerId, setDatabaseServerId] = useState<number | null>(null);
   const [databaseStatus, setDatabaseStatus] = useState<number | null>(null);
@@ -171,8 +172,8 @@ function AddDatabaseModal({
         databaseServerId: databaseServerId!,
         databaseTypeId: databaseTypeId!,
         databaseStatus: databaseStatus!,
-        // useTrustedConnection: useTrustedConnection,
-        // createDatabase: createDatabase,
+        databasePassword: databaseUserPassword,
+        createDatabase: createDatabase,
       })
       .then((response) => {
         if (response.status === 200) {
@@ -222,6 +223,15 @@ function AddDatabaseModal({
             />
           </Form.Group>
           <Form.Group>
+            <Form.Label>User Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Enter database user password"
+              value={databaseUserPassword}
+              onChange={(e) => setDatabaseUserPassword(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group>
             <Form.Label>Type</Form.Label>
             <Form.Control
               as="select"
@@ -260,14 +270,6 @@ function AddDatabaseModal({
               <option value={2}>Inactive</option>
             </Form.Control>
           </Form.Group>
-          {/* <Form.Group>
-            <Form.Check
-              type="checkbox"
-              label="Use trusted connection"
-              checked={useTrustedConnection}
-              onChange={(e) => setUseTrustedConnection(e.target.checked)}
-            />
-          </Form.Group> */}
           <Form.Group>
             <Form.Check
               type="checkbox"
@@ -318,6 +320,8 @@ function UpdateDatabaseModal({
   const [useTrustedConnection, setUseTrustedConnection] = useState(
     selectedDatabase.useTrustedConnection!
   );
+  const [databaseUser, setDatabaseUser] = useState(selectedDatabase.user);
+  const [databaseUserPassword, setDatabaseUserPassword] = useState("");
 
   useEffect(() => {
     setDatabaseName(selectedDatabase.name);
@@ -325,6 +329,7 @@ function UpdateDatabaseModal({
     setDatabaseServerId(selectedDatabase.server?.id);
     setDatabaseStatus(selectedDatabase.status);
     setUseTrustedConnection(selectedDatabase.useTrustedConnection!);
+    setDatabaseUser(selectedDatabase.user);
   }, [selectedDatabase]);
 
   function updateDatabase() {
@@ -336,7 +341,8 @@ function UpdateDatabaseModal({
       .updateDatabaseUpdate({
         databaseId: selectedDatabase.id!,
         databaseName: databaseName!,
-        databaseUser: "hello",
+        databaseUser: databaseUser!,
+        databaseUserPassword: databaseUserPassword,
         databaseServerId: databaseServerId!,
         databaseTypeId: databaseTypeId!,
         databaseStatus: databaseStatus!,
@@ -346,7 +352,7 @@ function UpdateDatabaseModal({
           const updatedDatabase = {
             ...selectedDatabase,
             name: databaseName,
-            user: "hello",
+            user: databaseUser,
             serverId: databaseServerId!,
             typeId: databaseTypeId!,
             status: databaseStatus!,
@@ -378,20 +384,29 @@ function UpdateDatabaseModal({
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Enter database name"
+              placeholder="Update database name"
               value={databaseName!}
               onChange={(e) => setDatabaseName(e.target.value)}
             />
           </Form.Group>
-          {/* <Form.Group>
+          <Form.Group>
             <Form.Label>User</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Enter database user"
+              placeholder="Update database user"
               value={databaseUser!}
               onChange={(e) => setDatabaseUser(e.target.value)}
             />
-          </Form.Group> */}
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Update database user password"
+              value={databaseUserPassword}
+              onChange={(e) => setDatabaseUserPassword(e.target.value)}
+            />
+          </Form.Group>
           <Form.Group>
             <Form.Label>Type</Form.Label>
             <Form.Control
@@ -434,14 +449,6 @@ function UpdateDatabaseModal({
               <option value={0}>Inactive</option>
             </Form.Control>
           </Form.Group>
-          {/* <Form.Group>
-            <Form.Check
-              type="checkbox"
-              label="Use trusted connection"
-              checked={useTrustedConnection}
-              onChange={(e) => setUseTrustedConnection(e.target.checked)}
-            />
-          </Form.Group> */}
         </Form>
       </Modal.Body>
       <Modal.Footer>

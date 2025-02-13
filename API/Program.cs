@@ -98,48 +98,55 @@ app.MapPost(
         async (
             string databaseName,
             string databaseUser,
+            string databasePassword,
             int databaseServerId,
             byte databaseTypeId,
-            Status databaseStatus
+            Status databaseStatus,
+            bool createDatabase
         ) =>
         {
             await dbLocator.AddDatabase(
                 databaseName,
                 databaseUser,
+                databasePassword,
                 databaseServerId,
                 databaseTypeId,
-                databaseStatus
+                databaseStatus,
+                createDatabase
             );
 
-            // custom stuff not part of the library, that you can implement!
-            using SqlConnection sqlConnection =
-                new(builder.Configuration["DbLocator:ConnectionString"]);
-            await sqlConnection.OpenAsync();
+            if (createDatabase)
+            {
+                // custom stuff not part of the library, that you can implement!
+                using SqlConnection sqlConnection =
+                    new(builder.Configuration["DbLocator:ConnectionString"]);
+                await sqlConnection.OpenAsync();
 
-            await sqlConnection.QueryAsync("use " + databaseName);
+                await sqlConnection.QueryAsync("use " + databaseName);
 
-            // grant select permission to the user on this database, connection string user should have db_owner role
-            await sqlConnection.QueryAsync("GRANT SELECT ON SCHEMA::dbo TO " + databaseUser);
+                // grant select permission to the user on this database, connection string user should have db_owner role
+                await sqlConnection.QueryAsync("GRANT SELECT ON SCHEMA::dbo TO " + databaseUser);
 
-            // create basic account table
-            await sqlConnection.QueryAsync(
-                "CREATE TABLE dbo.Account (AccountId INT PRIMARY KEY, AccountName NVARCHAR(50), AccountBalance DECIMAL(18, 2))"
-            );
+                // create basic account table
+                await sqlConnection.QueryAsync(
+                    "CREATE TABLE dbo.Account (AccountId INT PRIMARY KEY, AccountName NVARCHAR(50), AccountBalance DECIMAL(18, 2))"
+                );
 
-            // insert some random data into the account table (generated on the fly every time)
-            var randomAccountId = new Random().Next(1, 10000);
-            var randomAccountName = Guid.NewGuid().ToString()[..8];
-            var randomAccountBalance = new Random().Next(100, 1000);
+                // insert some random data into the account table (generated on the fly every time)
+                var randomAccountId = new Random().Next(1, 10000);
+                var randomAccountName = Guid.NewGuid().ToString()[..8];
+                var randomAccountBalance = new Random().Next(100, 1000);
 
-            await sqlConnection.QueryAsync(
-                "INSERT INTO dbo.Account (AccountId, AccountName, AccountBalance) VALUES (@AccountId, @AccountName, @AccountBalance)",
-                new
-                {
-                    AccountId = randomAccountId,
-                    AccountName = randomAccountName,
-                    AccountBalance = randomAccountBalance
-                }
-            );
+                await sqlConnection.QueryAsync(
+                    "INSERT INTO dbo.Account (AccountId, AccountName, AccountBalance) VALUES (@AccountId, @AccountName, @AccountBalance)",
+                    new
+                    {
+                        AccountId = randomAccountId,
+                        AccountName = randomAccountName,
+                        AccountBalance = randomAccountBalance
+                    }
+                );
+            }
         }
     )
     .WithTags("Database");
@@ -152,6 +159,7 @@ app.MapPut(
             int databaseId,
             string databaseName,
             string databaseUser,
+            string databaseUserPassword,
             int databaseServerId,
             byte databaseTypeId,
             Status databaseStatus
@@ -160,6 +168,7 @@ app.MapPut(
                 databaseId,
                 databaseName,
                 databaseUser,
+                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus
