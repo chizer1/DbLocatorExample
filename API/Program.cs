@@ -236,4 +236,21 @@ app.MapGet(
     )
     .WithTags("Accounts");
 
+app.Use(
+    async (context, next) =>
+    {
+        try
+        {
+            await next();
+        }
+        catch (Exception ex)
+        {
+            context.Response.StatusCode = 500;
+            Console.WriteLine(ex);
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync(ex.Message);
+        }
+    }
+);
+
 app.Run();
