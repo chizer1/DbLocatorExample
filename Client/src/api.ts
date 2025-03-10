@@ -276,6 +276,19 @@ export class HttpClient<SecurityDataType = unknown> {
       r.data = null as unknown as T;
       r.error = null as unknown as E;
 
+      if (response.status === 500) {
+        const errorBody = await response.text();
+        console.log(errorBody)
+        const match = errorBody.match(
+          /System\.InvalidOperationException: (.*?)(\r?\n|$)/
+        );
+        if (match) {
+          throw new Error(match[1]);
+        } else {
+          throw new Error(`${errorBody}`);
+        }
+      }
+
       const data = !responseFormat
         ? r
         : await response[responseFormat]()
@@ -283,6 +296,7 @@ export class HttpClient<SecurityDataType = unknown> {
               if (r.ok) {
                 r.data = data;
               } else {
+                console.log(data)
                 r.error = data;
               }
               return r;
@@ -294,18 +308,6 @@ export class HttpClient<SecurityDataType = unknown> {
 
       if (cancelToken) {
         this.abortControllers.delete(cancelToken);
-      }
-
-      if (response.status === 500) {
-        const errorBody = await response.text();
-        const match = errorBody.match(
-          /System\.InvalidOperationException: (.*?)(\r?\n|$)/
-        );
-        if (match) {
-          throw new Error(match[1]);
-        } else {
-          throw new Error(`${errorBody}`);
-        }
       }
 
       if (!response.ok) throw data;

@@ -128,7 +128,7 @@ function AddDatabaseServerModal({
   databaseServers: DatabaseServer[];
   setDataServers: (setDataServers: DatabaseServer[]) => void;
 }) {
-  const [name, setName] = useState("");
+  const [serverName, setServerName] = useState("");
   const [ipAddress, setIpAddress] = useState("");
 
   function addDatabaseServer() {
@@ -138,14 +138,14 @@ function AddDatabaseServerModal({
 
     api.addDatabaseServer
       .addDatabaseServerCreate({
-        databaseServerName: name,
+        databaseServerName: serverName,
         databaseServerIpAddress: ipAddress,
       })
       .then((response) => {
         if (response.status === 200) {
           const newDatabaseServer: DatabaseServer = {
             id: response.data,
-            name,
+            name: serverName,
             ipAddress,
           };
           setDataServers([...databaseServers, newDatabaseServer]);
@@ -167,10 +167,10 @@ function AddDatabaseServerModal({
       <Modal.Body>
         <Form>
           <Form.Group>
-            <Form.Label>Name</Form.Label>
+            <Form.Label>Server Name</Form.Label>
             <Form.Control
               type="text"
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setServerName(e.target.value)}
             />
           </Form.Group>
           <Form.Group>
