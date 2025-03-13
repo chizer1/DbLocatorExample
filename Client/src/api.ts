@@ -32,6 +32,8 @@ export interface DatabaseServer {
   id?: number;
   name?: string | null;
   ipAddress?: string | null;
+  hostName?: string | null;
+  fullyQualifiedDomainName?: string | null;
 }
 
 export interface DatabaseType {
@@ -520,6 +522,8 @@ export class Api<
       query: {
         databaseServerName: string;
         databaseServerIpAddress: string;
+        databaseServerHostName: string;
+        databaseServerFullyQualifiedDomainName: string;
       },
       params: RequestParams = {}
     ) =>
@@ -561,6 +565,8 @@ export class Api<
         databaseServerId: number;
         databaseServerName: string;
         databaseServerIpAddress: string;
+        databaseServerHostName: string;
+        databaseServerFullyQualifiedDomainName: string;
       },
       params: RequestParams = {}
     ) =>

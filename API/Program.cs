@@ -64,8 +64,18 @@ app.MapDelete("/deleteTenant", async (int tenantId) => await dbLocator.DeleteTen
 
 app.MapPost(
         "/addDatabaseServer",
-        async (string databaseServerName, string databaseServerIpAddress) =>
-            await dbLocator.AddDatabaseServer(databaseServerName, databaseServerIpAddress)
+        async (
+            string databaseServerName,
+            string databaseServerIpAddress,
+            string databaseServerHostName,
+            string databaseServerFullyQualifiedDomainName
+        ) =>
+            await dbLocator.AddDatabaseServer(
+                databaseServerName,
+                databaseServerIpAddress,
+                databaseServerHostName,
+                databaseServerFullyQualifiedDomainName
+            )
     )
     .WithTags("DatabaseServer");
 
@@ -74,11 +84,19 @@ app.MapGet("/getDatabaseServers", async () => await dbLocator.GetDatabaseServers
 
 app.MapPut(
         "/updateDatabaseServer",
-        async (int databaseServerId, string databaseServerName, string databaseServerIpAddress) =>
+        async (
+            int databaseServerId,
+            string databaseServerName,
+            string databaseServerIpAddress,
+            string databaseServerHostName,
+            string databaseServerFullyQualifiedDomainName
+        ) =>
             await dbLocator.UpdateDatabaseServer(
                 databaseServerId,
                 databaseServerName,
-                databaseServerIpAddress
+                databaseServerIpAddress,
+                databaseServerHostName,
+                databaseServerFullyQualifiedDomainName
             )
     )
     .WithTags("DatabaseServer");

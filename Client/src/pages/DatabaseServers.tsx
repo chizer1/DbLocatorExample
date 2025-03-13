@@ -56,12 +56,13 @@ function DatabaseServers() {
   return (
     <>
       <div>
-
         <h1>Database Servers</h1>
         <p>
           Database servers are the physical or virtual machines that host your
           databases. You can add, update, and delete database servers. 
           (This won't create a new database server, but will add it to the list of available servers in the application.)
+          <br />
+          You can connect by host name, domain name, or IP address.
         </p>
         <Button variant="primary" onClick={handleShowAddModal}>
           Add Database Server
@@ -78,6 +79,8 @@ function DatabaseServers() {
           <tr>
             <th>Name</th>
             <th>IP Address</th>
+            <th>Host Name</th>
+            <th>Domain Name</th>
             <th></th>
           </tr>
         </thead>
@@ -86,6 +89,8 @@ function DatabaseServers() {
             <tr key={databaseServer.id}>
               <td>{databaseServer.name}</td>
               <td>{databaseServer.ipAddress}</td>
+              <td>{databaseServer.hostName}</td>
+              <td>{databaseServer.fullyQualifiedDomainName}</td>
               <td>
                 <Trash
                   size={30}
@@ -130,6 +135,8 @@ function AddDatabaseServerModal({
 }) {
   const [serverName, setServerName] = useState("");
   const [ipAddress, setIpAddress] = useState("");
+  const [hostName, setHostName] = useState("");
+  const [fullyQualifiedDomainName, setFullyQualifiedDomainName] = useState("");
 
   function addDatabaseServer() {
     const api = new Api({
@@ -140,6 +147,8 @@ function AddDatabaseServerModal({
       .addDatabaseServerCreate({
         databaseServerName: serverName,
         databaseServerIpAddress: ipAddress,
+        databaseServerHostName: hostName,
+        databaseServerFullyQualifiedDomainName: fullyQualifiedDomainName,
       })
       .then((response) => {
         if (response.status === 200) {
@@ -147,6 +156,8 @@ function AddDatabaseServerModal({
             id: response.data,
             name: serverName,
             ipAddress,
+            hostName,
+            fullyQualifiedDomainName
           };
           setDataServers([...databaseServers, newDatabaseServer]);
           handleClose();
@@ -180,6 +191,20 @@ function AddDatabaseServerModal({
               onChange={(e) => setIpAddress(e.target.value)}
             />
           </Form.Group>
+          <Form.Group>
+            <Form.Label>Host Name</Form.Label>
+            <Form.Control
+              type="text"
+              onChange={(e) => setHostName(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Domain Name</Form.Label>
+            <Form.Control
+              type="text"
+              onChange={(e) => setFullyQualifiedDomainName(e.target.value)}
+            />
+          </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
@@ -209,10 +234,16 @@ function UpdateDatabaseServerModal({
 }) {
   const [name, setName] = useState(selectedDatabaseServer.name);
   const [ipAddress, setIpAddress] = useState(selectedDatabaseServer.ipAddress);
+  const [hostName, setHostName] = useState(selectedDatabaseServer.hostName);
+  const [fullyQualifiedDomainName, setFullyQualifiedDomainName] = useState(
+    selectedDatabaseServer.fullyQualifiedDomainName
+  );
 
   useEffect(() => {
     setName(selectedDatabaseServer.name);
     setIpAddress(selectedDatabaseServer.ipAddress);
+    setHostName(selectedDatabaseServer.hostName);
+    setFullyQualifiedDomainName(selectedDatabaseServer.fullyQualifiedDomainName);
   }, [selectedDatabaseServer]);
 
   function updateDatabaseServer() {
@@ -225,6 +256,8 @@ function UpdateDatabaseServerModal({
         databaseServerId: selectedDatabaseServer.id!,
         databaseServerName: name!,
         databaseServerIpAddress: ipAddress!,
+        databaseServerHostName: hostName!,
+        databaseServerFullyQualifiedDomainName: fullyQualifiedDomainName!,
       })
       .then((response) => {
         if (response.status === 200) {
@@ -270,6 +303,22 @@ function UpdateDatabaseServerModal({
               type="text"
               value={ipAddress!}
               onChange={(e) => setIpAddress(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Host Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={hostName!}
+              onChange={(e) => setHostName(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Domain Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={fullyQualifiedDomainName!}
+              onChange={(e) => setFullyQualifiedDomainName(e.target.value)}
             />
           </Form.Group>
         </Form>
