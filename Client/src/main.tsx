@@ -10,6 +10,7 @@ import Home from "./pages/Home.tsx";
 import NavigationBar from "./components/navigationBar.tsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import DatabaseUsers from "./pages/DatabaseUsers.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -19,6 +20,7 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="connections" element={<Connections />} />
+        <Route path="databaseUsers" element={<DatabaseUsers />} />
         <Route path="databases" element={<Databases />} />
         <Route path="databaseServers" element={<DatabaseServers />} />
         <Route path="databaseTypes" element={<DatabaseTypes />} />

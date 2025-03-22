@@ -26,7 +26,7 @@ function DatabaseTypes() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.getDatabaseTypes.getDatabaseTypesList().then((response) => {
+    api.databaseType.getDatabaseTypesList().then((response) => {
       setDatabaseTypes(response.data);
     });
   }, []);
@@ -36,7 +36,7 @@ function DatabaseTypes() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.deleteDatabaseType
+    api.databaseType
       .deleteDatabaseTypeDelete({ databaseTypeId: id })
       .then((response) => {
         if (response.status === 200) {
@@ -124,7 +124,7 @@ function AddDatabaseTypeModal({
 }) {
   const [name, setName] = useState("");
 
-  var databaseType: DatabaseType = {
+  const databaseType: DatabaseType = {
     id: 0,
     name: name,
   };
@@ -134,7 +134,7 @@ function AddDatabaseTypeModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.addDatabaseType
+    api.databaseType
       .addDatabaseTypeCreate({ name })
       .then((response) => {
         if (response.status === 200) {
@@ -205,14 +205,14 @@ function UpdateDatabaseTypeModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.updateDatabaseType
+    api.databaseType
       .updateDatabaseTypeUpdate({
         databaseTypeId: selectedDatabaseType.id!,
         name,
       })
       .then((response) => {
         if (response.status === 200) {
-          var updatedDatabaseType: DatabaseType = {
+          const updatedDatabaseType: DatabaseType = {
             id: selectedDatabaseType.id,
             name: name,
           };

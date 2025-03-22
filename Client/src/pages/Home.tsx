@@ -2,8 +2,15 @@ import { useEffect, useState } from "react";
 import { Api, DatabaseType, Tenant } from "../api";
 import { Button, Table } from "react-bootstrap";
 
+type Account = {
+  AccountId: number;
+  AccountName: string;
+  AccountBalance: number;
+
+}
+
 function Home() {
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [databaseTypes, setDatabaseTypes] = useState<DatabaseType[]>([]);
   const [selectedDatabaseTypeId, setSelectedDatabaseTypeId] =
     useState<number>(0);
@@ -16,11 +23,11 @@ function Home() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.getDatabaseTypes.getDatabaseTypesList().then((response) => {
+    api.databaseType.getDatabaseTypesList().then((response) => {
       setDatabaseTypes(response.data);
     });
 
-    api.getTenants.getTenantsList().then((response) => {
+    api.tenant.getTenantsList().then((response) => {
       setTenants(response.data);
     });
   }, []);
@@ -30,7 +37,7 @@ function Home() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.getAccounts
+    api.accounts
       .getAccountsList({
         tenantId: tenantId,
         databaseTypeId: databaseTypeId,

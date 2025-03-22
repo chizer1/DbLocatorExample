@@ -18,15 +18,15 @@ function Connections() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.getConnections.getConnectionsList().then((response) => {
+    api.connection.getConnectionsList().then((response) => {
       setConnections(response.data);
     });
 
-    api.getDatabases.getDatabasesList().then((response) => {
+    api.database.getDatabasesList().then((response) => {
       setDatabases(response.data);
     });
 
-    api.getTenants.getTenantsList().then((response) => {
+    api.tenant.getTenantsList().then((response) => {
       setTenants(response.data);
     });
   }, []);
@@ -36,7 +36,7 @@ function Connections() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.deleteConnection
+    api.connection
       .deleteConnectionDelete({ connectionId: id })
       .then((response) => {
         if (response.status === 200) {
@@ -126,7 +126,7 @@ function AddConnectionModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.addConnection
+    api.connection
       .addConnectionCreate({
         tenantId: tenantId!,
         databaseId: databaseId!,
