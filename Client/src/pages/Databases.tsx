@@ -28,15 +28,15 @@ function Databases() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.getDatabases.getDatabasesList().then((response) => {
+    api.database.getDatabasesList().then((response) => {
       setDatabases(response.data);
     });
 
-    api.getDatabaseTypes.getDatabaseTypesList().then((response) => {
+    api.databaseType.getDatabaseTypesList().then((response) => {
       setDatabaseTypes(response.data);
     });
 
-    api.getDatabaseServers.getDatabaseServersList().then((response) => {
+    api.databaseServer.getDatabaseServersList().then((response) => {
       setDatabaseServers(response.data);
     });
   }, []);
@@ -46,7 +46,7 @@ function Databases() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.deleteDatabase
+    api.database
       .deleteDatabaseDelete({ databaseId: id })
       .then((response) => {
         if (response.status === 200) {
@@ -163,7 +163,7 @@ function AddDatabaseModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.addDatabase
+    api.database
       .addDatabaseCreate({
         databaseName: databaseName,
         databaseServerId: databaseServerId!,
@@ -298,8 +298,6 @@ function UpdateDatabaseModal({
   const [useTrustedConnection, setUseTrustedConnection] = useState(
     selectedDatabase.useTrustedConnection!
   );
-  const [databaseUser, setDatabaseUser] = useState(selectedDatabase.user);
-  const [databaseUserPassword, setDatabaseUserPassword] = useState("");
 
   useEffect(() => {
     setDatabaseName(selectedDatabase.name);
@@ -307,7 +305,6 @@ function UpdateDatabaseModal({
     setDatabaseServerId(selectedDatabase.server?.id);
     setDatabaseStatus(selectedDatabase.status);
     setUseTrustedConnection(selectedDatabase.useTrustedConnection!);
-    setDatabaseUser(selectedDatabase.user);
   }, [selectedDatabase]);
 
   function updateDatabase() {
@@ -315,12 +312,10 @@ function UpdateDatabaseModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.updateDatabase
+    api.database
       .updateDatabaseUpdate({
         databaseId: selectedDatabase.id!,
         databaseName: databaseName!,
-        databaseUser: databaseUser!,
-        databaseUserPassword: databaseUserPassword,
         databaseServerId: databaseServerId!,
         databaseTypeId: databaseTypeId!,
         databaseStatus: databaseStatus!,
@@ -330,7 +325,6 @@ function UpdateDatabaseModal({
           const updatedDatabase = {
             ...selectedDatabase,
             name: databaseName,
-            user: databaseUser,
             serverId: databaseServerId!,
             typeId: databaseTypeId!,
             status: databaseStatus!,
@@ -365,24 +359,6 @@ function UpdateDatabaseModal({
               placeholder="Update database name"
               value={databaseName!}
               onChange={(e) => setDatabaseName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>User</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Update database user"
-              value={databaseUser!}
-              onChange={(e) => setDatabaseUser(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Update database user password"
-              value={databaseUserPassword}
-              onChange={(e) => setDatabaseUserPassword(e.target.value)}
             />
           </Form.Group>
           <Form.Group>

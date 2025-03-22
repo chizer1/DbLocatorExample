@@ -26,7 +26,7 @@ function DatabaseServers() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.getDatabaseServers.getDatabaseServersList().then((response) => {
+    api.databaseServer.getDatabaseServersList().then((response) => {
       setDatabaseServers(response.data);
     });
   }, []);
@@ -36,7 +36,7 @@ function DatabaseServers() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.deleteDatabaseServer
+    api.databaseServer
       .deleteDatabaseServerDelete({ serverId: id })
       .then((response) => {
         if (response.status === 200) {
@@ -146,7 +146,7 @@ function AddDatabaseServerModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.addDatabaseServer
+    api.databaseServer
       .addDatabaseServerCreate({
         databaseServerName: serverName,
         databaseServerIpAddress: ipAddress,
@@ -263,7 +263,7 @@ function UpdateDatabaseServerModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.updateDatabaseServer
+    api.databaseServer
       .updateDatabaseServerUpdate({
         databaseServerId: selectedDatabaseServer.id!,
         databaseServerName: name!,

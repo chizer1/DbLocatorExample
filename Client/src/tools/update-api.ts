@@ -8,7 +8,7 @@ console.log(path.join(process.cwd(), '../../api/swagger.json'))
 generateApi({ 
     name: 'api.ts',
     url: 'http://localhost:5022/swagger.json',
-    output: path.join(process.cwd(), './src/api'),
+    output: path.join(process.cwd(), './src'),
 })
 .catch(() => {
     console.error('Error generating API, is the API running?')

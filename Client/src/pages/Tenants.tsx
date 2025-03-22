@@ -25,7 +25,7 @@ function Tenants() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.getTenants.getTenantsList().then((response) => {
+    api.tenant.getTenantsList().then((response) => {
       setTenants(response.data);
     });
   }, []);
@@ -35,7 +35,7 @@ function Tenants() {
       baseUrl: "http://localhost:5022",
     });
 
-    api.deleteTenant
+    api.tenant
       .deleteTenantDelete({ tenantId: id })
       .then((response) => {
         if (response.status === 200) {
@@ -134,14 +134,14 @@ function AddTenantModal({
       baseUrl: "http://localhost:5022",
     });
 
-    var tenant: Tenant = {
+    const tenant: Tenant = {
       id: 0,
       name: name,
       code: code,
       status: status,
     };
 
-    api.addTenant
+    api.tenant
       .addTenantCreate({
         tenantName: name,
         tenantCode: code,
@@ -242,7 +242,7 @@ function UpdateTenantModal({
       baseUrl: "http://localhost:5022",
     });
 
-    api.updateTenant
+    api.tenant
       .updateTenantUpdate({
         tenantId: selectedTenant.id!,
         tenantName: name!,
