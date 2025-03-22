@@ -23,21 +23,49 @@ export interface Database {
   name?: string | null;
   type?: DatabaseType;
   server?: DatabaseServer;
+  /**
+   *
+   *
+   * 1 = Active
+   *
+   * 2 = Inactive
+   */
   status?: Status;
   useTrustedConnection?: boolean;
 }
 
-/** @format int32 */
+/**
+ *
+ *
+ * 1 = Owner
+ *
+ * 2 = SecurityAdmin
+ *
+ * 3 = AccessAdmin
+ *
+ * 4 = BackupOperator
+ *
+ * 5 = DdlAdmin
+ *
+ * 6 = DataWriter
+ *
+ * 7 = DataReader
+ *
+ * 8 = DenyDataWriter
+ *
+ * 9 = DenyDataReader
+ * @format int32
+ */
 export enum DatabaseRole {
-  Value1 = 1,
-  Value2 = 2,
-  Value3 = 3,
-  Value4 = 4,
-  Value5 = 5,
-  Value6 = 6,
-  Value7 = 7,
-  Value8 = 8,
-  Value9 = 9,
+  Owner = 1,
+  SecurityAdmin = 2,
+  AccessAdmin = 3,
+  BackupOperator = 4,
+  DdlAdmin = 5,
+  DataWriter = 6,
+  DataReader = 7,
+  DenyDataWriter = 8,
+  DenyDataReader = 9,
 }
 
 export interface DatabaseServer {
@@ -65,10 +93,17 @@ export interface DatabaseUser {
   roles?: DatabaseRole[] | null;
 }
 
-/** @format int32 */
+/**
+ *
+ *
+ * 1 = Active
+ *
+ * 2 = Inactive
+ * @format int32
+ */
 export enum Status {
-  Value1 = 1,
-  Value2 = 2,
+  Active = 1,
+  Inactive = 2,
 }
 
 export interface Tenant {
@@ -76,6 +111,13 @@ export interface Tenant {
   id?: number;
   name?: string | null;
   code?: string | null;
+  /**
+   *
+   *
+   * 1 = Active
+   *
+   * 2 = Inactive
+   */
   status?: Status;
 }
 
@@ -395,6 +437,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         databaseServerId?: number;
         /** @format int32 */
         databaseTypeId?: number;
+        /**
+         *
+         *
+         * 1 = Active
+         *
+         * 2 = Inactive
+         */
         databaseStatus?: Status;
         createDatabase?: boolean;
       },
@@ -439,6 +488,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         databaseServerId?: number;
         /** @format int32 */
         databaseTypeId?: number;
+        /**
+         *
+         *
+         * 1 = Active
+         *
+         * 2 = Inactive
+         */
         databaseStatus?: Status;
       },
       params: RequestParams = {},
@@ -738,6 +794,27 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format int32 */
         databaseUserId?: number;
+        /**
+         *
+         *
+         * 1 = Owner
+         *
+         * 2 = SecurityAdmin
+         *
+         * 3 = AccessAdmin
+         *
+         * 4 = BackupOperator
+         *
+         * 5 = DdlAdmin
+         *
+         * 6 = DataWriter
+         *
+         * 7 = DataReader
+         *
+         * 8 = DenyDataWriter
+         *
+         * 9 = DenyDataReader
+         */
         databaseRoleId?: DatabaseRole;
         addRole?: boolean;
       },
@@ -761,6 +838,27 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format int32 */
         databaseUserId?: number;
+        /**
+         *
+         *
+         * 1 = Owner
+         *
+         * 2 = SecurityAdmin
+         *
+         * 3 = AccessAdmin
+         *
+         * 4 = BackupOperator
+         *
+         * 5 = DdlAdmin
+         *
+         * 6 = DataWriter
+         *
+         * 7 = DataReader
+         *
+         * 8 = DenyDataWriter
+         *
+         * 9 = DenyDataReader
+         */
         databaseRoleId?: DatabaseRole;
         removeRole?: boolean;
       },
@@ -785,6 +883,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         tenantName?: string;
         tenantCode?: string;
+        /**
+         *
+         *
+         * 1 = Active
+         *
+         * 2 = Inactive
+         */
         tenantStatus?: Status;
       },
       params: RequestParams = {},
@@ -825,6 +930,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         tenantId?: number;
         tenantName?: string;
         tenantCode?: string;
+        /**
+         *
+         *
+         * 1 = Active
+         *
+         * 2 = Inactive
+         */
         tenantStatus?: Status;
       },
       params: RequestParams = {},

@@ -20,7 +20,6 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="connections" element={<Connections />} />
-        <Route path="databaseUserRoles" element={<Connections />} />
         <Route path="databaseUsers" element={<DatabaseUsers />} />
         <Route path="databases" element={<Databases />} />
         <Route path="databaseServers" element={<DatabaseServers />} />

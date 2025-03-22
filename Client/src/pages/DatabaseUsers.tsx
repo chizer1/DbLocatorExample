@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
-import { Api, Database, DatabaseUser } from "../api";
-import { Trash } from "react-bootstrap-icons";
+import { Api, Database, DatabaseRole, DatabaseUser, HttpResponse } from "../api";
+import { Pencil, Trash } from "react-bootstrap-icons";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 
@@ -11,6 +11,8 @@ function DatabaseUsers() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const handleShowAddModal = () => setShowAddModal(true);
+
+  const [editUser, setEditUser] = useState<DatabaseUser | null>(null);
 
   useEffect(() => {
     const api = new Api({
@@ -50,7 +52,7 @@ function DatabaseUsers() {
       <div>
         <h1>Database Users</h1>
         <p>
-          Datbase Users are the users that have access to a database.
+          Datbase Users are the users that have access to a database. Note: This is unnecessary if the database is using Trusted Authentication.
         </p>
         <Button variant="primary" onClick={handleShowAddModal}>
           Add Database User
@@ -62,12 +64,19 @@ function DatabaseUsers() {
           databases={databases}
           setDatabaseUsers={setDatabaseUsers}
         />
+        <EditDatabaseUsersModal
+          handleClose={() => setEditUser(null)}
+          setDatabaseUsers={setDatabaseUsers}
+          databaseUsers={databaseUsers}
+          editUser={editUser}
+        />
       </div>
       <Table striped border={1} hover>
         <thead>
           <tr>
             <th>User ID</th>
             <th>User Name</th>
+            <th>User Roles</th>
             <th></th>
           </tr>
         </thead>
@@ -77,11 +86,26 @@ function DatabaseUsers() {
               <td>{databaseUser.id}</td>
               <td>{databaseUser.name}</td>
               <td>
+                {databaseUser.roles && databaseUser.roles.length > 0
+                  ? databaseUser.roles.map((role) => <p style={{margin: 0}} key={role}>{DatabaseRole[role]}</p>)
+                  : "No Roles Assigned"}
+              </td>
+              <td>
                 <Trash
                   size={30}
                   color="red"
+                  title="Delete User"
                   style={{ cursor: "pointer" }}
                   onClick={() => deleteDatabaseUser(databaseUser.id!)}
+                />
+              </td>
+              <td>
+                <Pencil
+                  size={30}
+                  color="blue"
+                  title="Edit User Roles"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setEditUser(databaseUser)} 
                 />
               </td>
             </tr>
@@ -110,7 +134,7 @@ function AddDatabaseUsersModal({
   const [userPassword, setUserPassword] = useState<string>();
   const [createUser, setCreateUser] = useState<boolean>(true);
 
-  function addConnection() {
+  function addDatabaseUser() {
     const api = new Api({
       baseUrl: "http://localhost:5022",
     });
@@ -194,8 +218,101 @@ function AddDatabaseUsersModal({
         <Button variant="secondary" onClick={handleClose}>
           Close
         </Button>
-        <Button variant="primary" onClick={addConnection}>
+        <Button variant="primary" onClick={addDatabaseUser}>
           Add Connection
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+function EditDatabaseUsersModal({
+  handleClose,
+  editUser,
+  databaseUsers,
+  setDatabaseUsers,
+}: {
+  handleClose: () => void;
+  editUser: DatabaseUser | null;
+  databaseUsers: DatabaseUser[];
+  setDatabaseUsers: (databaseUsers: DatabaseUser[]) => void;
+}) {
+
+  const [userRoles, setUserRoles] = useState<DatabaseRole[]>([]);
+  useEffect(() => {
+    if (editUser !== null) {
+      setUserRoles(editUser.roles as DatabaseRole[]);
+    }
+  }, [editUser]);
+  const roles = Object.keys(DatabaseRole).filter((role) => !isNaN(Number(role))).map((role) => parseInt(role) as DatabaseRole);
+  return (
+    <Modal show={editUser !== null} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit User Roles</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          {/* // create checkbox group */}
+          <Form.Group controlId="userRoles">
+            <Form.Label>User Roles</Form.Label>
+            
+            {editUser !== null && roles.map((role) => (
+              <Form.Check
+                key={role}
+                type="checkbox"
+                label={DatabaseRole[role]}
+                id={role.toLocaleString()}
+                checked={userRoles.includes(role)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setUserRoles([...userRoles, role as DatabaseRole]);
+                  } else {
+                    setUserRoles(userRoles.filter((r) => r !== role as DatabaseRole));
+                  }
+                }}
+              />
+            ))}
+          </Form.Group>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+        </Button>
+        <Button variant="primary" onClick={async () => 
+          { 
+            const api = new Api({ baseUrl: "http://localhost:5022" });
+            if (editUser === null) {
+              return}
+
+            const removeRoles = editUser.roles?.filter(role => !userRoles.includes(role as DatabaseRole)) || [];
+            const addRoles = userRoles.filter(role => !editUser.roles?.includes(role as DatabaseRole)) || [];
+
+            const promises: Promise<HttpResponse<void, unknown>>[] = [];
+            for(const role of removeRoles) {
+              promises.push(api.databaseUserRole.deleteDatabaseUserRoleDelete({
+                databaseUserId: editUser.id!,
+                databaseRoleId: role
+              }))
+            }
+
+            for(const role of addRoles) {
+              promises.push(api.databaseUserRole.addDatabaseUserRoleCreate({
+                databaseUserId: editUser.id!,
+                databaseRoleId: role
+              }))
+            }
+
+            await Promise.all(promises);
+
+            editUser.roles = userRoles;
+            const newDatabaseUsers = databaseUsers.map((user) => 
+              user.id === editUser.id ? editUser : user
+            );
+            setDatabaseUsers(newDatabaseUsers);
+            handleClose();
+        }}>
+          Save Changes
         </Button>
       </Modal.Footer>
     </Modal>
