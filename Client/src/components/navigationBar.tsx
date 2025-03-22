@@ -14,6 +14,12 @@ const NavigationBar = () => {
             <Nav.Link as={Link} to="/connections">
               Connections
             </Nav.Link>
+            <Nav.Link as={Link} to="/databaseUserRoles">
+              Database User Roles
+            </Nav.Link>
+            <Nav.Link as={Link} to="/databaseUsers">
+              Database Users
+            </Nav.Link>
             <Nav.Link as={Link} to="/databases">
               Databases
             </Nav.Link>
