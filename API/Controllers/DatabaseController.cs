@@ -13,8 +13,6 @@ public class DatabaseController(Locator dbLocator) : ControllerBase
     [HttpPost("addDatabase")]
     public async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databasePassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
@@ -23,8 +21,6 @@ public class DatabaseController(Locator dbLocator) : ControllerBase
     {
         var databaseId = await dbLocator.AddDatabase(
             databaseName,
-            databaseUser,
-            databasePassword,
             databaseServerId,
             databaseTypeId,
             databaseStatus,
@@ -67,8 +63,6 @@ public class DatabaseController(Locator dbLocator) : ControllerBase
     public async Task UpdateDatabase(
         int databaseId,
         string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -77,8 +71,6 @@ public class DatabaseController(Locator dbLocator) : ControllerBase
         await dbLocator.UpdateDatabase(
             databaseId,
             databaseName,
-            databaseUser,
-            databaseUserPassword,
             databaseServerId,
             databaseTypeId,
             databaseStatus

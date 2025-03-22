@@ -152,8 +152,6 @@ function AddDatabaseModal({
   setDatabases: (databases: Database[]) => void;
 }) {
   const [databaseName, setDatabaseName] = useState("");
-  const [databaseUser, setDatabaseUser] = useState("");
-  const [databaseUserPassword, setDatabaseUserPassword] = useState("");
   const [databaseTypeId, setDatabaseTypeId] = useState<number | null>(null);
   const [databaseServerId, setDatabaseServerId] = useState<number | null>(null);
   const [databaseStatus, setDatabaseStatus] = useState<number | null>(null);
@@ -168,11 +166,9 @@ function AddDatabaseModal({
     api.addDatabase
       .addDatabaseCreate({
         databaseName: databaseName,
-        databaseUser: databaseUser,
         databaseServerId: databaseServerId!,
         databaseTypeId: databaseTypeId!,
         databaseStatus: databaseStatus!,
-        databasePassword: databaseUserPassword,
         createDatabase: createDatabase,
       })
       .then((response) => {
@@ -211,24 +207,6 @@ function AddDatabaseModal({
               placeholder="Enter database name"
               value={databaseName}
               onChange={(e) => setDatabaseName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>User</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter database user"
-              value={databaseUser}
-              onChange={(e) => setDatabaseUser(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>User Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Enter database user password"
-              value={databaseUserPassword}
-              onChange={(e) => setDatabaseUserPassword(e.target.value)}
             />
           </Form.Group>
           <Form.Group>
