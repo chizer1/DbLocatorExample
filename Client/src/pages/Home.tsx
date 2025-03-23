@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react";
-import { Api, DatabaseType, Tenant } from "../api";
-import { Button, Table } from "react-bootstrap";
-
-type Account = {
-  AccountId: number;
-  AccountName: string;
-  AccountBalance: number;
-
-}
+import { Api, DatabaseRole, DatabaseType, Tenant } from "../api";
+import { Button } from "react-bootstrap";
 
 function Home() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [results, setResults] = useState<any[]>([]);
   const [databaseTypes, setDatabaseTypes] = useState<DatabaseType[]>([]);
   const [selectedDatabaseTypeId, setSelectedDatabaseTypeId] =
     useState<number>(0);
 
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [selectedTenantId, setSelectedTenantId] = useState<number>(0);
+
+  const [databaseRoles] = useState<string[]>(Object.values(DatabaseRole).filter((value) => typeof value === "string") as string[])
+  const [selectedDatabaseRoleIds, setSelectedDatabaseRoleIds] = useState<string[]>([]);
+  const [sql, setSql] = useState<string>();
+
+  const [isQuery, setIsQuery] = useState<boolean>(true);
 
   useEffect(() => {
     const api = new Api({
@@ -32,29 +31,49 @@ function Home() {
     });
   }, []);
 
-  function getAccounts(tenantId: number, databaseTypeId: number) {
+  function executeQueryOrCommand(
+    tenantId: number,
+    databaseTypeId: number,
+    databaseRoles: DatabaseRole[],
+    sql: string,
+    isQuery: boolean
+  ) {
     const api = new Api({
       baseUrl: "http://localhost:5022",
     });
 
-    api.accounts
-      .getAccountsList({
+    const request = isQuery
+      ? api.custom.query({
         tenantId: tenantId,
         databaseTypeId: databaseTypeId,
+        databaseRoles: databaseRoles,
+        sql: sql,
       })
+      : api.custom.command({
+        tenantId: tenantId,
+        databaseTypeId: databaseTypeId,
+        databaseRoles: databaseRoles,
+        sql: sql,
+      });
+
+    request
       .then((response) => {
-        setAccounts(response.data);
+      setResults(response.data);
+      })
+      .catch((error) => {
+      setResults([{ error: error.message }]);
       });
   }
 
   return (
     <>
       <div>
-        <h1>Accounts</h1>
+        <h1>Run SQL</h1>
         <p>
-          After creating a tenant, database type, database server, 
-          database then creating a connection, you can get accounts between different tenants and database types.
-          This will return a list of accounts that are associated with the selected tenant and database type.
+          After creating a corresponding tenant, database type, database server, database, database AND connection, 
+          <br/>
+          you can run SQL queries or commands against it. You can test create tables as a dbowner, or 
+          run queries as a dbreader. Or you can do whatever else to your heart's content.
         </p>
         <div className="form-group">
           <label htmlFor="tenantSelect">Tenant</label>
@@ -93,35 +112,67 @@ function Home() {
           ))}
         </select>
       </div>
+      <div className="form-group">
+        <label htmlFor="databaseRoleSelect">Database Role</label>
+        <select
+          id="databaseRoleSelect"
+          className="form-control"
+          multiple
+          onChange={(e) => {
+            const selectedOptions = Array.from(e.target.selectedOptions, (option) =>
+              option.value
+            );
+            setSelectedDatabaseRoleIds(selectedOptions);
+          }}
+        >
+          {databaseRoles.map((databaseRole) => (
+            <option key={databaseRole} value={databaseRole}>
+              {databaseRole.toString()}
+            </option>
+          ))}
+        </select>
+        <label htmlFor="sqlInput">SQL</label>
+        <textarea
+          id="sqlInput"
+          className="form-control"
+          rows={3}
+          onChange={(e) => {
+            setSql(e.target.value);
+          }}
+        ></textarea>
+        <div className="form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="isQueryCheck"
+            checked={isQuery}
+            onChange={(e) => {
+              setIsQuery(e.target.checked);
+            }}
+          />
+          <label className="form-check-label" htmlFor="isQueryCheck">
+            Is Query
+          </label>
+        </div>
+      </div>
       <br />
       <Button
         variant="primary"
         onClick={() => {
-          getAccounts(selectedTenantId, selectedDatabaseTypeId);
+          executeQueryOrCommand(
+            selectedTenantId,
+            selectedDatabaseTypeId,
+            selectedDatabaseRoleIds.map((role) => DatabaseRole[role as keyof typeof DatabaseRole]),
+            sql || "",
+            isQuery
+          );
         }}
       >
-        Get Accounts
+        Run SQL
       </Button>
 
       <br />
-      <Table striped border={1} hover>
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          {accounts.map((account) => (
-            <tr key={account.AccountId}>
-              <td>{account.AccountId}</td>
-              <td>{account.AccountName}</td>
-              <td>{account.AccountBalance}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <div>{JSON.stringify(results)}</div>
     </>
   );
 }

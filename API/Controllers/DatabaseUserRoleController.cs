@@ -1,5 +1,3 @@
-using System.Data.SqlClient;
-using Dapper;
 using DbLocator;
 using DbLocator.Domain;
 using Microsoft.AspNetCore.Mvc;

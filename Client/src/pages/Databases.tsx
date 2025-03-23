@@ -68,8 +68,7 @@ function Databases() {
       <div>
         <h1>Databases</h1>
         <p>
-          Databases are used to store tenant data. On database creation, this example site implements custom logic 
-          outside of the library to grant the SQL user SELECT permissions and creates an Account table and fills it with sample data. 
+          Databases are used to store tenant data.
           <br /><br />
           Trusted Connection is available in the DbLocator library but not used in this example site. You also have the option if you
           want to physically create the database or just want to map to an existing database.

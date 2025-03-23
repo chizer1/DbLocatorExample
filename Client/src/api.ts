@@ -336,28 +336,53 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version 1.0
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-  accounts = {
+  custom = {
     /**
-     * No description
+     * Executes a SQL query and returns the result.
      *
-     * @tags Accounts
-     * @name GetAccountsList
-     * @request GET:/Accounts/getAccounts
+     * @tags Custom
+     * @name Query
+     * @request POST:/Custom/query
      */
-    getAccountsList: (
-      query?: {
-        /** @format int32 */
-        tenantId?: number;
-        /** @format int32 */
-        databaseTypeId?: number;
+    query: (
+      body: {
+        tenantId: number;
+        databaseTypeId: number;
+        databaseRoles: DatabaseRole[];
+        sql: string;
       },
       params: RequestParams = {},
     ) =>
-      this.request<any[], any>({
-        path: `/Accounts/getAccounts`,
-        method: "GET",
-        query: query,
+      this.request<List<dynamic>, any>({
+        path: `/Custom/query`,
+        method: "POST",
+        body: body,
+        type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * Executes a SQL command.
+     *
+     * @tags Custom
+     * @name Command
+     * @request POST:/Custom/command
+     */
+    command: (
+      body: {
+        tenantId: number;
+        databaseTypeId: number;
+        databaseRoles: DatabaseRole[];
+        sql: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/Custom/command`,
+        method: "POST",
+        body: body,
+        type: ContentType.Json,
         ...params,
       }),
   };
