@@ -292,14 +292,16 @@ function EditDatabaseUsersModal({
             for(const role of removeRoles) {
               promises.push(api.databaseUserRole.deleteDatabaseUserRoleDelete({
                 databaseUserId: editUser.id!,
-                databaseRoleId: role
+                databaseRoleId: role,
+                removeRole: true
               }))
             }
 
             for(const role of addRoles) {
               promises.push(api.databaseUserRole.addDatabaseUserRoleCreate({
                 databaseUserId: editUser.id!,
-                databaseRoleId: role
+                databaseRoleId: role,
+                addRole: true
               }))
             }
 
