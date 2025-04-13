@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DbLocator" Version="1.2.1" />
+    <PackageReference Include="DbLocator" Version="1.2.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
@@ -16,6 +16,6 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="dotnet tool restore" /> 
-    <Exec Command="dotnet swagger tofile --output ./wwwroot/swagger.json $(OutputPath)$(AssemblyName).dll v1" />
+
   </Target>
 </Project>
