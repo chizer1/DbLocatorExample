@@ -76,6 +76,7 @@ function DatabaseUsers() {
           <tr>
             <th>User ID</th>
             <th>User Name</th>
+            <th>Databases</th>
             <th>User Roles</th>
             <th></th>
           </tr>
@@ -85,10 +86,11 @@ function DatabaseUsers() {
             <tr key={databaseUser.id}>
               <td>{databaseUser.id}</td>
               <td>{databaseUser.name}</td>
+              
               <td>
-                {databaseUser.roles && databaseUser.roles.length > 0
-                  ? databaseUser.roles.map((role) => <p style={{margin: 0}} key={role}>{DatabaseRole[role]}</p>)
-                  : "No Roles Assigned"}
+                {databaseUser.databases?.map((database : Database) => (
+                  <div key={database.id}>{database.name}</div>
+                ))}
               </td>
               <td>
                 <Trash
@@ -129,10 +131,15 @@ function AddDatabaseUsersModal({
   databases: Database[];
   setDatabaseUsers: (databaseUsers: DatabaseUser[]) => void;
 }) {
-  const [databaseId, setDatabaseId] = useState<number>();
+  const [databaseIds, setDatabaseIds] = useState<number[]>();
   const [userName, setUserName] = useState<string>("");
   const [userPassword, setUserPassword] = useState<string>();
   const [createUser, setCreateUser] = useState<boolean>(true);
+
+  const handleDatabaseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const options = Array.from(e.target.selectedOptions, (option) => (option as HTMLOptionElement).value);
+    setDatabaseIds(options.map(Number));
+  };
 
   function addDatabaseUser() {
     const api = new Api({
@@ -141,10 +148,12 @@ function AddDatabaseUsersModal({
 
     api.databaseUser
       .addDatabaseUserCreate({
-        databaseId: databaseId!,
+        databaseIds: databaseIds,
+        
         userName: userName,
         userPassword: userPassword,
         createUser: createUser,
+      
       })
       .then((response) => {
         if (response.status === 200) {
@@ -168,23 +177,19 @@ function AddDatabaseUsersModal({
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Add Connection</Modal.Title>
+        <Modal.Title>Add Database User</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group controlId="databaseId">
-            <Form.Label>Database</Form.Label>
-            <Form.Control
-              as="select"
-              onChange={(e) => setDatabaseId(parseInt(e.target.value))}
-            >
-              <option>Select Database</option>
+            <Form.Label>Databases</Form.Label>
+            <Form.Select multiple onChange={handleDatabaseChange}>
               {databases.map((database) => (
-                <option key={database.id} value={database.id}>
-                  {database.name}
-                </option>
+              <option key={database.id} value={database.id}>
+                {database.name}
+              </option>
               ))}
-            </Form.Control>
+            </Form.Select>
           </Form.Group>
           <Form.Group controlId="userName">
             <Form.Label>User Name</Form.Label>
@@ -219,7 +224,7 @@ function AddDatabaseUsersModal({
           Close
         </Button>
         <Button variant="primary" onClick={addDatabaseUser}>
-          Add Connection
+          Add Database User
         </Button>
       </Modal.Footer>
     </Modal>

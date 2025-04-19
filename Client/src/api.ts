@@ -89,7 +89,7 @@ export interface DatabaseUser {
   id?: number;
   name?: string | null;
   /** @format int32 */
-  databaseId?: number;
+  databases?: Database[] | null;
   roles?: DatabaseRole[] | null;
 }
 
@@ -728,9 +728,9 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/DatabaseUser/addDatabaseUser
      */
     addDatabaseUserCreate: (
-      query?: {
+      body?: {
         /** @format int32 */
-        databaseId?: number;
+        databaseIds?: number[];
         userName?: string;
         userPassword?: string;
         createUser?: boolean;
@@ -740,7 +740,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<number, any>({
         path: `/DatabaseUser/addDatabaseUser`,
         method: "POST",
-        query: query,
+        body: body,
         format: "json",
         ...params,
       }),
