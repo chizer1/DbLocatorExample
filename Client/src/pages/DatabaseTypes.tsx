@@ -23,7 +23,7 @@ function DatabaseTypes() {
 
   useEffect(() => {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseType.getDatabaseTypesList().then((response) => {
@@ -33,7 +33,7 @@ function DatabaseTypes() {
 
   function deleteDatabaseType(id: number) {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseType
@@ -131,11 +131,11 @@ function AddDatabaseTypeModal({
 
   function addDatabaseType() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseType
-      .addDatabaseTypeCreate({ name })
+      .addDatabaseTypeCreate({ databaseTypeName: name })
       .then((response) => {
         if (response.status === 200) {
           databaseType.id = response.data;
@@ -202,13 +202,13 @@ function UpdateDatabaseTypeModal({
 
   function updateDatabaseType() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseType
       .updateDatabaseTypeUpdate({
         databaseTypeId: selectedDatabaseType.id!,
-        name,
+        databaseTypeName: name,
       })
       .then((response) => {
         if (response.status === 200) {

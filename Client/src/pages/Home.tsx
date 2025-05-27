@@ -19,7 +19,7 @@ function Home() {
 
   useEffect(() => {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseType.getDatabaseTypesList().then((response) => {
@@ -39,17 +39,17 @@ function Home() {
     isQuery: boolean
   ) {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     const request = isQuery
-      ? api.custom.query({
+      ? api.sql.queryCreate({
         tenantId: tenantId,
         databaseTypeId: databaseTypeId,
         databaseRoles: databaseRoles,
         sql: sql,
       })
-      : api.custom.command({
+      : api.sql.commandCreate({
         tenantId: tenantId,
         databaseTypeId: databaseTypeId,
         databaseRoles: databaseRoles,
@@ -58,10 +58,14 @@ function Home() {
 
     request
       .then((response) => {
-      setResults(response.data);
+        if (response && response.data !== undefined) {
+          setResults(response.data);
+        } else {
+          setResults([]);
+        }
       })
       .catch((error) => {
-      setResults([{ error: error.message }]);
+        setResults([{ error: error.message }]);
       });
   }
 

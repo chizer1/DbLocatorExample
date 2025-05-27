@@ -23,7 +23,7 @@ function DatabaseServers() {
 
   useEffect(() => {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseServer.getDatabaseServersList().then((response) => {
@@ -33,7 +33,7 @@ function DatabaseServers() {
 
   function deleteDatabaseServer(id: number) {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseServer
@@ -143,7 +143,7 @@ function AddDatabaseServerModal({
 
   function addDatabaseServer() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseServer
@@ -260,7 +260,7 @@ function UpdateDatabaseServerModal({
 
   function updateDatabaseServer() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseServer

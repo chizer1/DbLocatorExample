@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
-import { Api, Database, DatabaseRole, DatabaseUser, HttpResponse } from "../api";
+import { Api, Database, DatabaseRole, DatabaseUser } from "../api";
 import { Pencil, Trash } from "react-bootstrap-icons";
 import { Button, Form, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { AxiosResponse as HttpResponse } from "axios";
 
 function DatabaseUsers() {
   const [databaseUsers, setDatabaseUsers] = useState<DatabaseUser[]>([]);
@@ -16,7 +17,7 @@ function DatabaseUsers() {
 
   useEffect(() => {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseUser.getDatabaseUsersList().then((response) => {
@@ -30,7 +31,7 @@ function DatabaseUsers() {
 
   function deleteDatabaseUser(id: number) {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
     api.databaseUser
       .deleteDatabaseUserDelete({ databaseUserId: id })
@@ -143,17 +144,14 @@ function AddDatabaseUsersModal({
 
   function addDatabaseUser() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.databaseUser
       .addDatabaseUserCreate({
-        databaseIds: databaseIds,
-        
+        databaseIds: databaseIds || [],
         userName: userName,
         userPassword: userPassword,
-        createUser: createUser,
-      
       })
       .then((response) => {
         if (response.status === 200) {
@@ -286,7 +284,7 @@ function EditDatabaseUsersModal({
         </Button>
         <Button variant="primary" onClick={async () => 
           { 
-            const api = new Api({ baseUrl: "http://localhost:5022" });
+            const api = new Api({ baseURL: "http://localhost:5022" });
             if (editUser === null) {
               return}
 
@@ -298,7 +296,6 @@ function EditDatabaseUsersModal({
               promises.push(api.databaseUserRole.deleteDatabaseUserRoleDelete({
                 databaseUserId: editUser.id!,
                 databaseRoleId: role,
-                removeRole: true
               }))
             }
 
@@ -306,7 +303,6 @@ function EditDatabaseUsersModal({
               promises.push(api.databaseUserRole.addDatabaseUserRoleCreate({
                 databaseUserId: editUser.id!,
                 databaseRoleId: role,
-                addRole: true
               }))
             }
 

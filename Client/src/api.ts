@@ -1,6 +1,5 @@
 /* eslint-disable */
 /* tslint:disable */
-// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -9,6 +8,52 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
+
+export interface AddConnectionRequest {
+  /** @format int32 */
+  tenantId?: number;
+  /** @format int32 */
+  databaseId?: number;
+}
+
+export interface AddDatabaseRequest {
+  databaseName: string | null;
+  /** @format int32 */
+  databaseServerId?: number;
+  /** @format int32 */
+  databaseTypeId?: number;
+  databaseStatus?: Status;
+}
+
+export interface AddDatabaseServerRequest {
+  databaseServerName: string | null;
+  databaseServerIpAddress: string | null;
+  databaseServerHostName: string | null;
+  databaseServerFullyQualifiedDomainName: string | null;
+  isLinkedServer?: boolean;
+}
+
+export interface AddDatabaseTypeRequest {
+  databaseTypeName: string | null;
+}
+
+export interface AddDatabaseUser {
+  databaseIds: number[] | null;
+  userName: string | null;
+  userPassword?: string | null;
+}
+
+export interface AddDatabaseUserRoleRequest {
+  /** @format int32 */
+  databaseUserId?: number;
+  databaseRoleId?: DatabaseRole;
+}
+
+export interface AddTenantRequest {
+  tenantName: string | null;
+  tenantCode: string | null;
+  tenantStatus?: Status;
+}
 
 export interface Connection {
   /** @format int32 */
@@ -23,49 +68,21 @@ export interface Database {
   name?: string | null;
   type?: DatabaseType;
   server?: DatabaseServer;
-  /**
-   *
-   *
-   * 1 = Active
-   *
-   * 2 = Inactive
-   */
   status?: Status;
   useTrustedConnection?: boolean;
 }
 
-/**
- *
- *
- * 1 = Owner
- *
- * 2 = SecurityAdmin
- *
- * 3 = AccessAdmin
- *
- * 4 = BackupOperator
- *
- * 5 = DdlAdmin
- *
- * 6 = DataWriter
- *
- * 7 = DataReader
- *
- * 8 = DenyDataWriter
- *
- * 9 = DenyDataReader
- * @format int32
- */
+/** @format int32 */
 export enum DatabaseRole {
-  Owner = 1,
-  SecurityAdmin = 2,
-  AccessAdmin = 3,
-  BackupOperator = 4,
-  DdlAdmin = 5,
-  DataWriter = 6,
-  DataReader = 7,
-  DenyDataWriter = 8,
-  DenyDataReader = 9,
+  Value1 = 1,
+  Value2 = 2,
+  Value3 = 3,
+  Value4 = 4,
+  Value5 = 5,
+  Value6 = 6,
+  Value7 = 7,
+  Value8 = 8,
+  Value9 = 9,
 }
 
 export interface DatabaseServer {
@@ -88,22 +105,29 @@ export interface DatabaseUser {
   /** @format int32 */
   id?: number;
   name?: string | null;
-  /** @format int32 */
   databases?: Database[] | null;
   roles?: DatabaseRole[] | null;
 }
 
-/**
- *
- *
- * 1 = Active
- *
- * 2 = Inactive
- * @format int32
- */
+export interface DeleteDatabaseUserRoleRequest {
+  /** @format int32 */
+  databaseUserId?: number;
+  databaseRoleId?: DatabaseRole;
+}
+
+export interface SqlRequest {
+  /** @format int32 */
+  tenantId?: number;
+  /** @format int32 */
+  databaseTypeId?: number;
+  databaseRoles: DatabaseRole[] | null;
+  sql: string | null;
+}
+
+/** @format int32 */
 export enum Status {
-  Active = 1,
-  Inactive = 2,
+  Value1 = 1,
+  Value2 = 2,
 }
 
 export interface Tenant {
@@ -111,20 +135,57 @@ export interface Tenant {
   id?: number;
   name?: string | null;
   code?: string | null;
-  /**
-   *
-   *
-   * 1 = Active
-   *
-   * 2 = Inactive
-   */
   status?: Status;
 }
 
-export type QueryParamsType = Record<string | number, any>;
-export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
+export interface UpdateDatabaseRequest {
+  /** @format int32 */
+  databaseId?: number;
+  databaseName: string | null;
+  /** @format int32 */
+  databaseServerId?: number;
+  /** @format int32 */
+  databaseTypeId?: number;
+  databaseStatus?: Status;
+}
 
-export interface FullRequestParams extends Omit<RequestInit, "body"> {
+export interface UpdateDatabaseServerRequest {
+  /** @format int32 */
+  databaseServerId?: number;
+  databaseServerName: string | null;
+  databaseServerIpAddress: string | null;
+  databaseServerHostName: string | null;
+  databaseServerFullyQualifiedDomainName: string | null;
+}
+
+export interface UpdateDatabaseTypeRequest {
+  /** @format int32 */
+  databaseTypeId?: number;
+  databaseTypeName: string | null;
+}
+
+export interface UpdateDatabaseUserRequest {
+  /** @format int32 */
+  databaseUserId?: number;
+  databaseIds: number[] | null;
+  userName: string | null;
+  userPassword: string | null;
+}
+
+export interface UpdateTenantRequest {
+  /** @format int32 */
+  tenantId?: number;
+  tenantName: string | null;
+  tenantCode: string | null;
+  tenantStatus?: Status;
+}
+
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
+import axios from "axios";
+
+export type QueryParamsType = Record<string | number, any>;
+
+export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -134,30 +195,20 @@ export interface FullRequestParams extends Omit<RequestInit, "body"> {
   /** query params */
   query?: QueryParamsType;
   /** format of response (i.e. response.json() -> format: "json") */
-  format?: ResponseFormat;
+  format?: ResponseType;
   /** request body */
   body?: unknown;
-  /** base url */
-  baseUrl?: string;
-  /** request cancellation token */
-  cancelToken?: CancelToken;
 }
 
 export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
 
-export interface ApiConfig<SecurityDataType = unknown> {
-  baseUrl?: string;
-  baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
-  securityWorker?: (securityData: SecurityDataType | null) => Promise<RequestParams | void> | RequestParams | void;
-  customFetch?: typeof fetch;
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+  securityWorker?: (
+    securityData: SecurityDataType | null,
+  ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
+  secure?: boolean;
+  format?: ResponseType;
 }
-
-export interface HttpResponse<D extends unknown, E extends unknown = unknown> extends Response {
-  data: D;
-  error: E;
-}
-
-type CancelToken = Symbol | string | number;
 
 export enum ContentType {
   Json = "application/json",
@@ -167,166 +218,95 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public baseUrl: string = "";
+  public instance: AxiosInstance;
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
-  private abortControllers = new Map<CancelToken, AbortController>();
-  private customFetch = (...fetchParams: Parameters<typeof fetch>) => fetch(...fetchParams);
+  private secure?: boolean;
+  private format?: ResponseType;
 
-  private baseApiParams: RequestParams = {
-    credentials: "same-origin",
-    headers: {},
-    redirect: "follow",
-    referrerPolicy: "no-referrer",
-  };
-
-  constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
-    Object.assign(this, apiConfig);
+  constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
+    this.instance = axios.create({ ...axiosConfig, baseURL: axiosConfig.baseURL || "" });
+    this.secure = secure;
+    this.format = format;
+    this.securityWorker = securityWorker;
   }
 
   public setSecurityData = (data: SecurityDataType | null) => {
     this.securityData = data;
   };
 
-  protected encodeQueryParam(key: string, value: any) {
-    const encodedKey = encodeURIComponent(key);
-    return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
-  }
+  protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
+    const method = params1.method || (params2 && params2.method);
 
-  protected addQueryParam(query: QueryParamsType, key: string) {
-    return this.encodeQueryParam(key, query[key]);
-  }
-
-  protected addArrayQueryParam(query: QueryParamsType, key: string) {
-    const value = query[key];
-    return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
-  }
-
-  protected toQueryString(rawQuery?: QueryParamsType): string {
-    const query = rawQuery || {};
-    const keys = Object.keys(query).filter((key) => "undefined" !== typeof query[key]);
-    return keys
-      .map((key) => (Array.isArray(query[key]) ? this.addArrayQueryParam(query, key) : this.addQueryParam(query, key)))
-      .join("&");
-  }
-
-  protected addQueryParams(rawQuery?: QueryParamsType): string {
-    const queryString = this.toQueryString(rawQuery);
-    return queryString ? `?${queryString}` : "";
-  }
-
-  private contentFormatters: Record<ContentType, (input: any) => any> = {
-    [ContentType.Json]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string") ? JSON.stringify(input) : input,
-    [ContentType.Text]: (input: any) => (input !== null && typeof input !== "string" ? JSON.stringify(input) : input),
-    [ContentType.FormData]: (input: any) =>
-      Object.keys(input || {}).reduce((formData, key) => {
-        const property = input[key];
-        formData.append(
-          key,
-          property instanceof Blob
-            ? property
-            : typeof property === "object" && property !== null
-              ? JSON.stringify(property)
-              : `${property}`,
-        );
-        return formData;
-      }, new FormData()),
-    [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
-  };
-
-  protected mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
     return {
-      ...this.baseApiParams,
+      ...this.instance.defaults,
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...(this.baseApiParams.headers || {}),
+        ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
     };
   }
 
-  protected createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
-    if (this.abortControllers.has(cancelToken)) {
-      const abortController = this.abortControllers.get(cancelToken);
-      if (abortController) {
-        return abortController.signal;
+  protected stringifyFormItem(formItem: unknown) {
+    if (typeof formItem === "object" && formItem !== null) {
+      return JSON.stringify(formItem);
+    } else {
+      return `${formItem}`;
+    }
+  }
+
+  protected createFormData(input: Record<string, unknown>): FormData {
+    return Object.keys(input || {}).reduce((formData, key) => {
+      const property = input[key];
+      const propertyContent: any[] = property instanceof Array ? property : [property];
+
+      for (const formItem of propertyContent) {
+        const isFileType = formItem instanceof Blob || formItem instanceof File;
+        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
       }
-      return void 0;
-    }
 
-    const abortController = new AbortController();
-    this.abortControllers.set(cancelToken, abortController);
-    return abortController.signal;
-  };
+      return formData;
+    }, new FormData());
+  }
 
-  public abortRequest = (cancelToken: CancelToken) => {
-    const abortController = this.abortControllers.get(cancelToken);
-
-    if (abortController) {
-      abortController.abort();
-      this.abortControllers.delete(cancelToken);
-    }
-  };
-
-  public request = async <T = any, E = any>({
-    body,
+  public request = async <T = any, _E = any>({
     secure,
     path,
     type,
     query,
     format,
-    baseUrl,
-    cancelToken,
+    body,
     ...params
-  }: FullRequestParams): Promise<HttpResponse<T, E>> => {
+  }: FullRequestParams): Promise<AxiosResponse<T>> => {
     const secureParams =
-      ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
+      ((typeof secure === "boolean" ? secure : this.secure) &&
         this.securityWorker &&
         (await this.securityWorker(this.securityData))) ||
       {};
     const requestParams = this.mergeRequestParams(params, secureParams);
-    const queryString = query && this.toQueryString(query);
-    const payloadFormatter = this.contentFormatters[type || ContentType.Json];
-    const responseFormat = format || requestParams.format;
+    const responseFormat = format || this.format || undefined;
 
-    return this.customFetch(`${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`, {
+    if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
+      body = this.createFormData(body as Record<string, unknown>);
+    }
+
+    if (type === ContentType.Text && body && body !== null && typeof body !== "string") {
+      body = JSON.stringify(body);
+    }
+
+    return this.instance.request({
       ...requestParams,
       headers: {
         ...(requestParams.headers || {}),
         ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
       },
-      signal: (cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal) || null,
-      body: typeof body === "undefined" || body === null ? null : payloadFormatter(body),
-    }).then(async (response) => {
-      const r = response.clone() as HttpResponse<T, E>;
-      r.data = null as unknown as T;
-      r.error = null as unknown as E;
-
-      const data = !responseFormat
-        ? r
-        : await response[responseFormat]()
-            .then((data) => {
-              if (r.ok) {
-                r.data = data;
-              } else {
-                r.error = data;
-              }
-              return r;
-            })
-            .catch((e) => {
-              r.error = e;
-              return r;
-            });
-
-      if (cancelToken) {
-        this.abortControllers.delete(cancelToken);
-      }
-
-      if (!response.ok) throw data;
-      return data;
+      params: query,
+      responseType: responseFormat,
+      data: body,
+      url: path,
     });
   };
 }
@@ -336,56 +316,6 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version 1.0
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-  custom = {
-    /**
-     * Executes a SQL query and returns the result.
-     *
-     * @tags Custom
-     * @name Query
-     * @request POST:/Custom/query
-     */
-    query: (
-      body: {
-        tenantId: number;
-        databaseTypeId: number;
-        databaseRoles: DatabaseRole[];
-        sql: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<List<dynamic>, any>({
-        path: `/Custom/query`,
-        method: "POST",
-        body: body,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * Executes a SQL command.
-     *
-     * @tags Custom
-     * @name Command
-     * @request POST:/Custom/command
-     */
-    command: (
-      body: {
-        tenantId: number;
-        databaseTypeId: number;
-        databaseRoles: DatabaseRole[];
-        sql: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/Custom/command`,
-        method: "POST",
-        body: body,
-        type: ContentType.Json,
-        ...params,
-      }),
-  };
   connection = {
     /**
      * No description
@@ -394,19 +324,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AddConnectionCreate
      * @request POST:/Connection/addConnection
      */
-    addConnectionCreate: (
-      query?: {
-        /** @format int32 */
-        tenantId?: number;
-        /** @format int32 */
-        databaseId?: number;
-      },
-      params: RequestParams = {},
-    ) =>
+    addConnectionCreate: (data: AddConnectionRequest, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/Connection/addConnection`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -455,29 +378,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AddDatabaseCreate
      * @request POST:/Database/addDatabase
      */
-    addDatabaseCreate: (
-      query?: {
-        databaseName?: string;
-        /** @format int32 */
-        databaseServerId?: number;
-        /** @format int32 */
-        databaseTypeId?: number;
-        /**
-         *
-         *
-         * 1 = Active
-         *
-         * 2 = Inactive
-         */
-        databaseStatus?: Status;
-        createDatabase?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
+    addDatabaseCreate: (data: AddDatabaseRequest, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/Database/addDatabase`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -504,30 +410,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateDatabaseUpdate
      * @request PUT:/Database/updateDatabase
      */
-    updateDatabaseUpdate: (
-      query?: {
-        /** @format int32 */
-        databaseId?: number;
-        databaseName?: string;
-        /** @format int32 */
-        databaseServerId?: number;
-        /** @format int32 */
-        databaseTypeId?: number;
-        /**
-         *
-         *
-         * 1 = Active
-         *
-         * 2 = Inactive
-         */
-        databaseStatus?: Status;
-      },
-      params: RequestParams = {},
-    ) =>
+    updateDatabaseUpdate: (data: UpdateDatabaseRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/Database/updateDatabase`,
         method: "PUT",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -560,20 +448,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AddDatabaseServerCreate
      * @request POST:/DatabaseServer/addDatabaseServer
      */
-    addDatabaseServerCreate: (
-      query?: {
-        databaseServerName?: string;
-        databaseServerIpAddress?: string;
-        databaseServerHostName?: string;
-        databaseServerFullyQualifiedDomainName?: string;
-        isLinkedServer?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
+    addDatabaseServerCreate: (data: AddDatabaseServerRequest, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/DatabaseServer/addDatabaseServer`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -600,21 +480,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateDatabaseServerUpdate
      * @request PUT:/DatabaseServer/updateDatabaseServer
      */
-    updateDatabaseServerUpdate: (
-      query?: {
-        /** @format int32 */
-        databaseServerId?: number;
-        databaseServerName?: string;
-        databaseServerIpAddress?: string;
-        databaseServerHostName?: string;
-        databaseServerFullyQualifiedDomainName?: string;
-      },
-      params: RequestParams = {},
-    ) =>
+    updateDatabaseServerUpdate: (data: UpdateDatabaseServerRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/DatabaseServer/updateDatabaseServer`,
         method: "PUT",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -647,16 +518,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AddDatabaseTypeCreate
      * @request POST:/DatabaseType/addDatabaseType
      */
-    addDatabaseTypeCreate: (
-      query?: {
-        name?: string;
-      },
-      params: RequestParams = {},
-    ) =>
+    addDatabaseTypeCreate: (data: AddDatabaseTypeRequest, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/DatabaseType/addDatabaseType`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -683,18 +550,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateDatabaseTypeUpdate
      * @request PUT:/DatabaseType/updateDatabaseType
      */
-    updateDatabaseTypeUpdate: (
-      query?: {
-        /** @format int32 */
-        databaseTypeId?: number;
-        name?: string;
-      },
-      params: RequestParams = {},
-    ) =>
+    updateDatabaseTypeUpdate: (data: UpdateDatabaseTypeRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/DatabaseType/updateDatabaseType`,
         method: "PUT",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -727,20 +588,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AddDatabaseUserCreate
      * @request POST:/DatabaseUser/addDatabaseUser
      */
-    addDatabaseUserCreate: (
-      body?: {
-        /** @format int32 */
-        databaseIds?: number[];
-        userName?: string;
-        userPassword?: string;
-        createUser?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
+    addDatabaseUserCreate: (data: AddDatabaseUser, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/DatabaseUser/addDatabaseUser`,
         method: "POST",
-        body: body,
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -752,21 +605,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateDatabaseUserUpdate
      * @request PUT:/DatabaseUser/updateDatabaseUser
      */
-    updateDatabaseUserUpdate: (
-      query?: {
-        /** @format int32 */
-        databaseUserId?: number;
-        userName?: string;
-        userPassword?: string;
-        updateUser?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<number, any>({
+    updateDatabaseUserUpdate: (data: UpdateDatabaseUserRequest, params: RequestParams = {}) =>
+      this.request<void, any>({
         path: `/DatabaseUser/updateDatabaseUser`,
         method: "PUT",
-        query: query,
-        format: "json",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -796,7 +640,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format int32 */
         databaseUserId?: number;
-        deleteUser?: boolean;
       },
       params: RequestParams = {},
     ) =>
@@ -815,40 +658,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AddDatabaseUserRoleCreate
      * @request POST:/DatabaseUserRole/addDatabaseUserRole
      */
-    addDatabaseUserRoleCreate: (
-      query?: {
-        /** @format int32 */
-        databaseUserId?: number;
-        /**
-         *
-         *
-         * 1 = Owner
-         *
-         * 2 = SecurityAdmin
-         *
-         * 3 = AccessAdmin
-         *
-         * 4 = BackupOperator
-         *
-         * 5 = DdlAdmin
-         *
-         * 6 = DataWriter
-         *
-         * 7 = DataReader
-         *
-         * 8 = DenyDataWriter
-         *
-         * 9 = DenyDataReader
-         */
-        databaseRoleId?: DatabaseRole;
-        addRole?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
+    addDatabaseUserRoleCreate: (data: AddDatabaseUserRoleRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/DatabaseUserRole/addDatabaseUserRole`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -859,40 +674,46 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name DeleteDatabaseUserRoleDelete
      * @request DELETE:/DatabaseUserRole/deleteDatabaseUserRole
      */
-    deleteDatabaseUserRoleDelete: (
-      query?: {
-        /** @format int32 */
-        databaseUserId?: number;
-        /**
-         *
-         *
-         * 1 = Owner
-         *
-         * 2 = SecurityAdmin
-         *
-         * 3 = AccessAdmin
-         *
-         * 4 = BackupOperator
-         *
-         * 5 = DdlAdmin
-         *
-         * 6 = DataWriter
-         *
-         * 7 = DataReader
-         *
-         * 8 = DenyDataWriter
-         *
-         * 9 = DenyDataReader
-         */
-        databaseRoleId?: DatabaseRole;
-        removeRole?: boolean;
-      },
-      params: RequestParams = {},
-    ) =>
+    deleteDatabaseUserRoleDelete: (data: DeleteDatabaseUserRoleRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/DatabaseUserRole/deleteDatabaseUserRole`,
         method: "DELETE",
-        query: query,
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
+  sql = {
+    /**
+     * No description
+     *
+     * @tags Sql
+     * @name QueryCreate
+     * @request POST:/Sql/query
+     */
+    queryCreate: (data: SqlRequest, params: RequestParams = {}) =>
+      this.request<any[], any>({
+        path: `/Sql/query`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Sql
+     * @name CommandCreate
+     * @request POST:/Sql/command
+     */
+    commandCreate: (data: SqlRequest, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/Sql/command`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
@@ -904,25 +725,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AddTenantCreate
      * @request POST:/Tenant/addTenant
      */
-    addTenantCreate: (
-      query?: {
-        tenantName?: string;
-        tenantCode?: string;
-        /**
-         *
-         *
-         * 1 = Active
-         *
-         * 2 = Inactive
-         */
-        tenantStatus?: Status;
-      },
-      params: RequestParams = {},
-    ) =>
+    addTenantCreate: (data: AddTenantRequest, params: RequestParams = {}) =>
       this.request<number, any>({
         path: `/Tenant/addTenant`,
         method: "POST",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -949,27 +757,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateTenantUpdate
      * @request PUT:/Tenant/updateTenant
      */
-    updateTenantUpdate: (
-      query?: {
-        /** @format int32 */
-        tenantId?: number;
-        tenantName?: string;
-        tenantCode?: string;
-        /**
-         *
-         *
-         * 1 = Active
-         *
-         * 2 = Inactive
-         */
-        tenantStatus?: Status;
-      },
-      params: RequestParams = {},
-    ) =>
+    updateTenantUpdate: (data: UpdateTenantRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/Tenant/updateTenant`,
         method: "PUT",
-        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

@@ -7,9 +7,15 @@
   <ItemGroup>
     <PackageReference Include="DbLocator" Version="1.2.5" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.4" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.4.3" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="Unchase.Swashbuckle.AspNetCore.Extensions" Version="2.7.2" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.4.3" />
   </ItemGroup>
+  <Target Name="GenerateApiClient" AfterTargets="Build">
+    <Exec Command="dotnet swagger tofile --output openapi.json $(OutputPath)$(AssemblyName).dll v1" />
+    <Exec Command="npx swagger-typescript-api@13.0.3 -p openapi.json -o ../Client/src/ -n api.ts --axios" />  
+  </Target>
 </Project>

@@ -25,7 +25,7 @@ function Databases() {
 
   useEffect(() => {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.database.getDatabasesList().then((response) => {
@@ -43,7 +43,7 @@ function Databases() {
 
   function deleteDatabase(id: number) {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.database
@@ -155,11 +155,10 @@ function AddDatabaseModal({
   const [databaseServerId, setDatabaseServerId] = useState<number | null>(null);
   const [databaseStatus, setDatabaseStatus] = useState<number | null>(null);
   const [useTrustedConnection] = useState(false);
-  const [createDatabase, setCreateDatabase] = useState(false);
 
   function addDatabase() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.database
@@ -168,7 +167,6 @@ function AddDatabaseModal({
         databaseServerId: databaseServerId!,
         databaseTypeId: databaseTypeId!,
         databaseStatus: databaseStatus!,
-        createDatabase: createDatabase,
       })
       .then((response) => {
         if (response.status === 200) {
@@ -247,14 +245,6 @@ function AddDatabaseModal({
               <option value={2}>Inactive</option>
             </Form.Control>
           </Form.Group>
-          <Form.Group>
-            <Form.Check
-              type="checkbox"
-              label="Create database"
-              checked={createDatabase}
-              onChange={(e) => setCreateDatabase(e.target.checked)}
-            />
-          </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
@@ -286,54 +276,58 @@ function UpdateDatabaseModal({
   databaseTypes: DatabaseType[];
   databaseServers: DatabaseServer[];
 }) {
-  const [databaseName, setDatabaseName] = useState(selectedDatabase.name);
-  const [databaseTypeId, setDatabaseTypeId] = useState(
-    selectedDatabase.type?.id
+  const [databaseName, setDatabaseName] = useState(selectedDatabase.name || "");
+  const [databaseTypeId, setDatabaseTypeId] = useState<number | null>(
+    selectedDatabase.type?.id || null
   );
-  const [databaseServerId, setDatabaseServerId] = useState(
-    selectedDatabase.server?.id
+  const [databaseServerId, setDatabaseServerId] = useState<number | null>(
+    selectedDatabase.server?.id || null
   );
-  const [databaseStatus, setDatabaseStatus] = useState(selectedDatabase.status);
+  const [databaseStatus, setDatabaseStatus] = useState<number | null>(
+    selectedDatabase.status || null
+  );
   const [useTrustedConnection, setUseTrustedConnection] = useState(
     selectedDatabase.useTrustedConnection!
   );
 
   useEffect(() => {
-    setDatabaseName(selectedDatabase.name);
-    setDatabaseTypeId(selectedDatabase.type?.id);
-    setDatabaseServerId(selectedDatabase.server?.id);
-    setDatabaseStatus(selectedDatabase.status);
+    setDatabaseName(selectedDatabase.name || "");
+    setDatabaseTypeId(selectedDatabase.type?.id || null);
+    setDatabaseServerId(selectedDatabase.server?.id || null);
+    setDatabaseStatus(selectedDatabase.status || null);
     setUseTrustedConnection(selectedDatabase.useTrustedConnection!);
   }, [selectedDatabase]);
 
   function updateDatabase() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.database
       .updateDatabaseUpdate({
         databaseId: selectedDatabase.id!,
-        databaseName: databaseName!,
+        databaseName: databaseName,
         databaseServerId: databaseServerId!,
         databaseTypeId: databaseTypeId!,
         databaseStatus: databaseStatus!,
       })
       .then((response) => {
         if (response.status === 200) {
-          const updatedDatabase = {
-            ...selectedDatabase,
-            name: databaseName,
-            serverId: databaseServerId!,
-            typeId: databaseTypeId!,
-            status: databaseStatus!,
-            useTrustedConnection: useTrustedConnection,
-          };
-          setDatabases(
-            databases.map((database) =>
-              database.id === selectedDatabase.id ? updatedDatabase : database
-            )
-          );
+          const newDatabases = databases.map((database) => {
+            if (database.id === selectedDatabase.id) {
+              return {
+                ...database,
+                name: databaseName,
+                server: databaseServers.find((s) => s.id === databaseServerId)!,
+                type: databaseTypes.find((t) => t.id === databaseTypeId)!,
+                status: databaseStatus!,
+                useTrustedConnection: useTrustedConnection,
+              };
+            }
+            return database;
+          });
+          setDatabases(newDatabases);
+
           handleClose();
         }
       })
@@ -355,8 +349,8 @@ function UpdateDatabaseModal({
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Update database name"
-              value={databaseName!}
+              placeholder="Enter database name"
+              value={databaseName}
               onChange={(e) => setDatabaseName(e.target.value)}
             />
           </Form.Group>
@@ -364,10 +358,10 @@ function UpdateDatabaseModal({
             <Form.Label>Type</Form.Label>
             <Form.Control
               as="select"
-              value={databaseTypeId}
-              onChange={(e) => setDatabaseTypeId(parseInt(e.target.value))}
+              value={databaseTypeId?.toString() || ""}
+              onChange={(e) => setDatabaseTypeId(e.target.value ? parseInt(e.target.value) : null)}
             >
-              <option>Select database type</option>
+              <option value="">Select database type</option>
               {databaseTypes.map((databaseType) => (
                 <option key={databaseType.id} value={databaseType.id}>
                   {databaseType.name}
@@ -379,10 +373,10 @@ function UpdateDatabaseModal({
             <Form.Label>Server</Form.Label>
             <Form.Control
               as="select"
-              value={databaseServerId}
-              onChange={(e) => setDatabaseServerId(parseInt(e.target.value))}
+              value={databaseServerId?.toString() || ""}
+              onChange={(e) => setDatabaseServerId(e.target.value ? parseInt(e.target.value) : null)}
             >
-              <option>Select database server</option>
+              <option value="">Select database server</option>
               {databaseServers.map((databaseServer) => (
                 <option key={databaseServer.id} value={databaseServer.id}>
                   {databaseServer.name}
@@ -394,13 +388,21 @@ function UpdateDatabaseModal({
             <Form.Label>Status</Form.Label>
             <Form.Control
               as="select"
-              value={databaseStatus}
-              onChange={(e) => setDatabaseStatus(parseInt(e.target.value))}
+              value={databaseStatus?.toString() || ""}
+              onChange={(e) => setDatabaseStatus(e.target.value ? parseInt(e.target.value) : null)}
             >
-              <option>Select database status</option>
+              <option value="">Select database status</option>
               <option value={1}>Active</option>
-              <option value={0}>Inactive</option>
+              <option value={2}>Inactive</option>
             </Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Check
+              type="checkbox"
+              label="Use Trusted Connection"
+              checked={useTrustedConnection}
+              onChange={(e) => setUseTrustedConnection(e.target.checked)}
+            />
           </Form.Group>
         </Form>
       </Modal.Body>
@@ -409,7 +411,7 @@ function UpdateDatabaseModal({
           Close
         </Button>
         <Button variant="primary" onClick={updateDatabase}>
-          Update Database
+          Update
         </Button>
       </Modal.Footer>
     </Modal>

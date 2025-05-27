@@ -22,7 +22,7 @@ function Tenants() {
 
   useEffect(() => {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.tenant.getTenantsList().then((response) => {
@@ -32,7 +32,7 @@ function Tenants() {
 
   function deleteTenant(id: number) {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.tenant
@@ -131,7 +131,7 @@ function AddTenantModal({
 
   function addTenant() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     const tenant: Tenant = {
@@ -239,7 +239,7 @@ function UpdateTenantModal({
 
   function updateTenant() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.tenant

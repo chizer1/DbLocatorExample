@@ -15,7 +15,7 @@ function Connections() {
 
   useEffect(() => {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.connection.getConnectionsList().then((response) => {
@@ -33,7 +33,7 @@ function Connections() {
 
   function deleteConnection(id: number) {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.connection
@@ -123,7 +123,7 @@ function AddConnectionModal({
 
   function addConnection() {
     const api = new Api({
-      baseUrl: "http://localhost:5022",
+      baseURL: "http://localhost:5022",
     });
 
     api.connection
