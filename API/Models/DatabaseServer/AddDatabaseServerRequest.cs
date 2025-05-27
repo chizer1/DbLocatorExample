@@ -1,0 +1,10 @@
+namespace DbLocatorExample.Models.DatabaseServer;
+
+public class AddDatabaseServerRequest
+{
+    public required string DatabaseServerName { get; set; }
+    public required string DatabaseServerIpAddress { get; set; }
+    public required string DatabaseServerHostName { get; set; }
+    public required string DatabaseServerFullyQualifiedDomainName { get; set; }
+    public bool IsLinkedServer { get; set; }
+}

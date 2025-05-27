@@ -1,6 +1,5 @@
 ﻿using DbLocator;
-using Microsoft.Extensions.Caching.Distributed;
-using Unchase.Swashbuckle.AspNetCore.Extensions.Extensions;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,13 +17,9 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddControllers();
-builder.Services.ConfigureSwaggerGen(options =>
-{
-    options.AddEnumsWithValuesFixFilters();
-});
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient(provider => new Locator(
     builder.Configuration["DbLocator:ConnectionString"],
@@ -43,10 +38,17 @@ var app = builder.Build();
 
 app.UseCors();
 app.UseHttpsRedirection();
-app.UseSwagger();
-app.UseSwaggerUI();
-app.UseStaticFiles();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger(options =>
+    {
+        options.RouteTemplate = "/openapi/{documentName}.json";
+    });
+    app.MapScalarApiReference();
+}
+
+app.UseStaticFiles();
 app.MapControllers();
 
 app.Use(

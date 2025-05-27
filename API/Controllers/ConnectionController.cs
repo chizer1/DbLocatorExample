@@ -1,5 +1,6 @@
 using DbLocator;
 using DbLocator.Domain;
+using DbLocatorExample.Models.Connection;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DbLocatorExample.Controllers;
@@ -9,9 +10,9 @@ namespace DbLocatorExample.Controllers;
 public class ConnectionController(Locator dbLocator) : ControllerBase
 {
     [HttpPost("addConnection")]
-    public async Task<int> AddConnection(int tenantId, int databaseId)
+    public async Task<int> AddConnection([FromBody] AddConnectionRequest request)
     {
-        return await dbLocator.AddConnection(tenantId, databaseId);
+        return await dbLocator.AddConnection(request.TenantId, request.DatabaseId);
     }
 
     [HttpGet("getConnections")]

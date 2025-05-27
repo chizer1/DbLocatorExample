@@ -1,5 +1,6 @@
 using DbLocator;
 using DbLocator.Domain;
+using DbLocatorExample.Models.Tenant;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DbLocatorExample.Controllers;
@@ -9,9 +10,13 @@ namespace DbLocatorExample.Controllers;
 public class TenantController(Locator dbLocator) : ControllerBase
 {
     [HttpPost("addTenant")]
-    public async Task<int> AddTenant(string tenantName, string tenantCode, Status tenantStatus)
+    public async Task<int> AddTenant([FromBody] AddTenantRequest request)
     {
-        return await dbLocator.AddTenant(tenantName, tenantCode, tenantStatus);
+        return await dbLocator.AddTenant(
+            request.TenantName,
+            request.TenantCode,
+            request.TenantStatus
+        );
     }
 
     [HttpGet("getTenants")]
@@ -21,14 +26,14 @@ public class TenantController(Locator dbLocator) : ControllerBase
     }
 
     [HttpPut("updateTenant")]
-    public async Task UpdateTenant(
-        int tenantId,
-        string tenantName,
-        string tenantCode,
-        Status tenantStatus
-    )
+    public async Task UpdateTenant([FromBody] UpdateTenantRequest request)
     {
-        await dbLocator.UpdateTenant(tenantId, tenantName, tenantCode, tenantStatus);
+        await dbLocator.UpdateTenant(
+            request.TenantId,
+            request.TenantName,
+            request.TenantCode,
+            request.TenantStatus
+        );
     }
 
     [HttpDelete("deleteTenant")]

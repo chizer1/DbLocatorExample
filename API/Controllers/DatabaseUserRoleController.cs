@@ -1,5 +1,5 @@
 using DbLocator;
-using DbLocator.Domain;
+using DbLocatorExample.Models.DatabaseUserRole;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DbLocatorExample.Controllers;
@@ -9,22 +9,14 @@ namespace DbLocatorExample.Controllers;
 public class DatabaseUserRoleController(Locator dbLocator) : ControllerBase
 {
     [HttpPost("addDatabaseUserRole")]
-    public async Task AddDatabaseUserRole(
-        int databaseUserId,
-        DatabaseRole databaseRoleId,
-        bool addRole
-    )
+    public async Task AddDatabaseUserRole([FromBody] AddDatabaseUserRoleRequest request)
     {
-        await dbLocator.AddDatabaseUserRole(databaseUserId, databaseRoleId, addRole);
+        await dbLocator.AddDatabaseUserRole(request.DatabaseUserId, request.DatabaseRoleId);
     }
 
     [HttpDelete("deleteDatabaseUserRole")]
-    public async Task DeleteDatabaseUserRole(
-        int databaseUserId,
-        DatabaseRole databaseRoleId,
-        bool removeRole
-    )
+    public async Task DeleteDatabaseUserRole([FromBody] DeleteDatabaseUserRoleRequest request)
     {
-        await dbLocator.DeleteDatabaseUserRole(databaseUserId, databaseRoleId, removeRole);
+        await dbLocator.DeleteDatabaseUserRole(request.DatabaseUserId, request.DatabaseRoleId);
     }
 }

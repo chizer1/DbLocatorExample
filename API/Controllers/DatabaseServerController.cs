@@ -1,5 +1,6 @@
 using DbLocator;
 using DbLocator.Domain;
+using DbLocatorExample.Models.DatabaseServer;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DbLocatorExample.Controllers;
@@ -9,20 +10,14 @@ namespace DbLocatorExample.Controllers;
 public class DatabaseServerController(Locator dbLocator) : ControllerBase
 {
     [HttpPost("addDatabaseServer")]
-    public async Task<int> AddDatabaseServer(
-        string databaseServerName,
-        string databaseServerIpAddress,
-        string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName,
-        bool isLinkedServer
-    )
+    public async Task<int> AddDatabaseServer([FromBody] AddDatabaseServerRequest request)
     {
         return await dbLocator.AddDatabaseServer(
-            databaseServerName,
-            databaseServerIpAddress,
-            databaseServerHostName,
-            databaseServerFullyQualifiedDomainName,
-            isLinkedServer
+            request.DatabaseServerName,
+            request.DatabaseServerIpAddress,
+            request.DatabaseServerHostName,
+            request.DatabaseServerFullyQualifiedDomainName,
+            request.IsLinkedServer
         );
     }
 
@@ -33,20 +28,14 @@ public class DatabaseServerController(Locator dbLocator) : ControllerBase
     }
 
     [HttpPut("updateDatabaseServer")]
-    public async Task UpdateDatabaseServer(
-        int databaseServerId,
-        string databaseServerName,
-        string databaseServerIpAddress,
-        string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName
-    )
+    public async Task UpdateDatabaseServer([FromBody] UpdateDatabaseServerRequest request)
     {
         await dbLocator.UpdateDatabaseServer(
-            databaseServerId,
-            databaseServerName,
-            databaseServerIpAddress,
-            databaseServerHostName,
-            databaseServerFullyQualifiedDomainName
+            request.DatabaseServerId,
+            request.DatabaseServerName,
+            request.DatabaseServerIpAddress,
+            request.DatabaseServerHostName,
+            request.DatabaseServerFullyQualifiedDomainName
         );
     }
 
