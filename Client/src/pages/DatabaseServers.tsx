@@ -238,7 +238,21 @@ function AddDatabaseServerModal({
         toast.success("Database server added successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const apiError = error instanceof Error ? error.response?.data : null;
+      let errorMessage = "An unknown error occurred";
+      
+      if (apiError) {
+        if (typeof apiError === 'string') {
+          errorMessage = apiError;
+        } else if (apiError.errors) {
+          // Get the first error message from any field
+          const firstErrorField = Object.keys(apiError.errors)[0];
+          errorMessage = apiError.errors[firstErrorField][0];
+        } else if (apiError.message) {
+          errorMessage = apiError.message;
+        }
+      }
+      
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -324,7 +338,7 @@ function UpdateDatabaseServerModal({
 
     try {
       const response = await api.databaseServer.updateDatabaseServerUpdate({
-        serverId: server.id!,
+        databaseServerId: server.id!,
         databaseServerName: values.serverName,
         databaseServerHostName: values.databaseServerHostName,
         databaseServerIpAddress: values.serverIpAddress,
@@ -349,7 +363,21 @@ function UpdateDatabaseServerModal({
         toast.success("Database server updated successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const apiError = error instanceof Error ? error.response?.data : null;
+      let errorMessage = "An unknown error occurred";
+      
+      if (apiError) {
+        if (typeof apiError === 'string') {
+          errorMessage = apiError;
+        } else if (apiError.errors) {
+          // Get the first error message from any field
+          const firstErrorField = Object.keys(apiError.errors)[0];
+          errorMessage = apiError.errors[firstErrorField][0];
+        } else if (apiError.message) {
+          errorMessage = apiError.message;
+        }
+      }
+      
       toast.error(errorMessage, {
         autoClose: false,
       });

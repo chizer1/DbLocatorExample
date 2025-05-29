@@ -48,8 +48,27 @@ function DatabaseUsers() {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
-    api.databaseUser
-      .deleteDatabaseUserDelete({ databaseUserId: id })
+
+    // Find the user in our existing data
+    const user = databaseUsers.find(u => u.id === id);
+    if (!user) {
+      toast.error("User not found");
+      return;
+    }
+
+    // Delete all roles first
+    const rolePromises = (user.roles || []).map((role: DatabaseRole) =>
+      api.databaseUserRole.deleteDatabaseUserRoleDelete({
+        databaseUserId: id,
+        databaseRoleId: role
+      })
+    );
+
+    Promise.all(rolePromises)
+      .then(() => {
+        // After roles are deleted, delete the user
+        return api.databaseUser.deleteDatabaseUserDelete({ databaseUserId: id });
+      })
       .then((response) => {
         if (response.status === 200) {
           const newDatabaseUsers = databaseUsers.filter(
@@ -241,20 +260,30 @@ function AddDatabaseUserModal({
     });
 
     try {
+      // First, create the database user
       const response = await api.databaseUser.addDatabaseUserCreate({
-        databaseUserId: parseInt(values.databaseId),
-        databaseUserName: values.username,
-        databaseUserPassword: values.password,
+        databaseIds: values.databaseIds.map((id: string) => parseInt(id)),
+        userName: values.username,
+        userPassword: values.password,
       });
 
       if (response.status === 200) {
-        const newUser: DatabaseUser = {
-          id: response.data!,
-          databaseId: parseInt(values.databaseId),
-          username: values.username,
-          password: values.password,
-        };
-        setDatabaseUsers([...databaseUsers, newUser]);
+        const newUserId = response.data;
+        
+        // Then, add roles for the user
+        const rolePromises = values.roles.map((roleId: string) => 
+          api.databaseUserRole.addDatabaseUserRoleCreate({
+            databaseUserId: newUserId,
+            databaseRoleId: parseInt(roleId) as DatabaseRole
+          })
+        );
+
+        await Promise.all(rolePromises);
+
+        // Refresh the database users list
+        const usersResponse = await api.databaseUser.getDatabaseUsersList();
+        setDatabaseUsers(usersResponse.data);
+        
         handleClose();
         toast.success("Database user added successfully!");
       }

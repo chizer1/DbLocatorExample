@@ -32,11 +32,11 @@ public class DatabaseServerController(Locator dbLocator) : ControllerBase
     {
         await dbLocator.UpdateDatabaseServer(
             request.DatabaseServerId,
-            request.DatabaseServerHostName,
             request.DatabaseServerName,
+            request.DatabaseServerHostName,
             request.DatabaseServerIpAddress,
             request.DatabaseServerFullyQualifiedDomainName,
-            request.IsLinkedServer
+            false
         );
     }
 
