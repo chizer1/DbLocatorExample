@@ -1,43 +1,35 @@
 import { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
-import { Api, Database, DatabaseServer, DatabaseType } from "../api";
-import { Trash, GearFill } from "react-bootstrap-icons";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Api, Database, DatabaseType, DatabaseServer, Status } from "../api";
+import { Trash, Pencil } from "react-bootstrap-icons";
+import { Button, Modal, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
+import Form from "../components/forms/Form";
+import FormField from "../components/forms/FormField";
+import { FaDatabase, FaServer, FaPlus, FaCheck, FaTimes } from "react-icons/fa";
+import { composeValidators, required, minLength } from "../utils/validation";
 
 function Databases() {
   const [databases, setDatabases] = useState<Database[]>([]);
   const [databaseTypes, setDatabaseTypes] = useState<DatabaseType[]>([]);
   const [databaseServers, setDatabaseServers] = useState<DatabaseServer[]>([]);
-  const [selectedDatabase, setSelectedDatabase] = useState<Database | null>(
-    null
-  );
+  const [selectedDatabase, setSelectedDatabase] = useState<Database | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleCloseAddModal = () => setShowAddModal(false);
-  const handleShowAddModal = () => setShowAddModal(true);
-
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const handleCloseUpdateModal = () => setShowUpdateModal(false);
-  const handleShowUpdateModal = (database: Database) => {
-    setSelectedDatabase(database);
-    setShowUpdateModal(true);
-  };
 
   useEffect(() => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.database.getDatabasesList().then((response) => {
-      setDatabases(response.data);
-    });
-
-    api.databaseType.getDatabaseTypesList().then((response) => {
-      setDatabaseTypes(response.data);
-    });
-
-    api.databaseServer.getDatabaseServersList().then((response) => {
-      setDatabaseServers(response.data);
+    Promise.all([
+      api.database.getDatabasesList(),
+      api.databaseType.getDatabaseTypesList(),
+      api.databaseServer.getDatabaseServersList()
+    ]).then(([databasesResponse, typesResponse, serversResponse]) => {
+      setDatabases(databasesResponse.data);
+      setDatabaseTypes(typesResponse.data);
+      setDatabaseServers(serversResponse.data);
     });
   }, []);
 
@@ -65,72 +57,133 @@ function Databases() {
 
   return (
     <>
-      <div>
-        <h1>Databases</h1>
-        <p>
-          Databases are used to store tenant data.
-          <br /><br />
-          Trusted Connection is available in the DbLocator library but not used in this example site. You also have the option if you
-          want to physically create the database or just want to map to an existing database.
-          <br /><br />
-          You can add, update, and delete databases.
+      <div className="mb-4">
+        <h1 className="display-4 mb-3">Databases</h1>
+        <p className="lead text-muted">
+          Manage your databases. Add new databases or modify existing ones.
         </p>
-        <Button variant="primary" onClick={handleShowAddModal}>
-          Add Database
+        <Button 
+          variant="primary" 
+          onClick={() => setShowAddModal(true)}
+          className="d-flex align-items-center gap-2"
+        >
+          <FaPlus /> Add New Database
         </Button>
         <AddDatabaseModal
           show={showAddModal}
-          handleClose={handleCloseAddModal}
+          handleClose={() => setShowAddModal(false)}
           databases={databases}
+          setDatabases={setDatabases}
           databaseTypes={databaseTypes}
           databaseServers={databaseServers}
-          setDatabases={setDatabases}
         />
       </div>
-      <Table striped border={1} hover>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Server</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {databases.map((database) => (
-            <tr key={database.id}>
-              <td>{database.name}</td>
-              <td>{database.type?.name}</td>
-              <td>{database.server?.name}</td>
-              <td>
-                <Trash
-                  size={30}
-                  color="red"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => deleteDatabase(database.id!)}
-                />
-                <GearFill
-                  size={20}
-                  color="gray"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleShowUpdateModal(database)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      {selectedDatabase && (
-        <UpdateDatabaseModal
-          show={showUpdateModal}
-          handleClose={handleCloseUpdateModal}
-          selectedDatabase={selectedDatabase}
-          databases={databases}
-          setDatabases={setDatabases}
-          databaseTypes={databaseTypes}
-          databaseServers={databaseServers}
-        />
-      )}
+      <div className="card shadow-sm">
+        <div className="card-body p-0">
+          <Table 
+            hover 
+            responsive 
+            className="mb-0"
+            style={{
+              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
+              '--bs-table-hover-color': 'inherit',
+            } as any}
+          >
+            <thead className="bg-light">
+              <tr>
+                <th className="border-0 px-4 py-3">Name</th>
+                <th className="border-0 px-4 py-3">Type</th>
+                <th className="border-0 px-4 py-3">Server</th>
+                <th className="border-0 px-4 py-3">Status</th>
+                <th className="border-0 px-4 py-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {databases.map((database) => (
+                <tr key={database.id} className="align-middle">
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaDatabase className="text-primary" />
+                      <span>{database.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaDatabase className="text-info" />
+                      <span>{database.type?.name || 'Not specified'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaServer className="text-success" />
+                      <span>{database.server?.name || 'Not specified'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge bg={database.status === 1 ? "success" : "warning"} className="px-3 py-2">
+                      {database.status === 1 ? "Active" : "Inactive"}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-end">
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => {
+                          setSelectedDatabase(database);
+                          setShowUpdateModal(true);
+                        }}
+                      >
+                        <Pencil size={16} />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => deleteDatabase(database.id!)}
+                      >
+                        <Trash size={16} />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {databases.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center gap-2">
+                      <FaDatabase size={32} />
+                      <p className="mb-0">No databases found</p>
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm"
+                        onClick={() => setShowAddModal(true)}
+                      >
+                        Create your first database
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </div>
+      <UpdateDatabaseModal
+        show={showUpdateModal}
+        handleClose={() => {
+          setShowUpdateModal(false);
+          setSelectedDatabase(null);
+        }}
+        database={selectedDatabase}
+        databases={databases}
+        setDatabases={setDatabases}
+        databaseTypes={databaseTypes}
+        databaseServers={databaseServers}
+      />
     </>
   );
 }
@@ -139,56 +192,71 @@ function AddDatabaseModal({
   show,
   handleClose,
   databases,
+  setDatabases,
   databaseTypes,
   databaseServers,
-  setDatabases,
 }: {
   show: boolean;
   handleClose: () => void;
   databases: Database[];
+  setDatabases: (databases: Database[]) => void;
   databaseTypes: DatabaseType[];
   databaseServers: DatabaseServer[];
-  setDatabases: (databases: Database[]) => void;
 }) {
-  const [databaseName, setDatabaseName] = useState("");
-  const [databaseTypeId, setDatabaseTypeId] = useState<number | null>(null);
-  const [databaseServerId, setDatabaseServerId] = useState<number | null>(null);
-  const [databaseStatus, setDatabaseStatus] = useState<number | null>(null);
-  const [useTrustedConnection] = useState(false);
+  const initialValues = {
+    name: "",
+    typeId: "",
+    serverId: "",
+    status: "1", // Default to active
+  };
 
-  function addDatabase() {
+  const handleSubmit = async (values: any) => {
+    if (!values.name || !values.typeId) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // If there's only one server, use its ID regardless of the form value
+    const serverId = databaseServers.length === 1 
+      ? databaseServers[0].id 
+      : parseInt(values.serverId);
+
+    if (!serverId) {
+      toast.error("Please select a database server");
+      return;
+    }
+
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.database
-      .addDatabaseCreate({
-        databaseName: databaseName,
-        databaseServerId: databaseServerId!,
-        databaseTypeId: databaseTypeId!,
-        databaseStatus: databaseStatus!,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const newDatabase: Database = {
-            id: response.data!,
-            name: databaseName,
-            server: databaseServers.find((s) => s.id === databaseServerId)!,
-            type: databaseTypes.find((t) => t.id === databaseTypeId)!,
-            status: databaseStatus!,
-            useTrustedConnection: useTrustedConnection,
-          };
-          setDatabases([...databases, newDatabase]);
-
-          handleClose();
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.database.addDatabaseCreate({
+        databaseName: values.name.trim(),
+        databaseTypeId: parseInt(values.typeId),
+        databaseServerId: serverId,
+        databaseStatus: parseInt(values.status),
       });
-  }
+
+      if (response.status === 200) {
+        const newDatabase: Database = {
+          id: response.data!,
+          name: values.name.trim(),
+          type: databaseTypes.find(t => t.id === parseInt(values.typeId))!,
+          server: databaseServers.find(s => s.id === serverId)!,
+          status: parseInt(values.status)
+        };
+        setDatabases([...databases, newDatabase]);
+        handleClose();
+        toast.success("Database added successfully!");
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
@@ -196,65 +264,66 @@ function AddDatabaseModal({
         <Modal.Title>Add Database</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter database name"
-              value={databaseName}
-              onChange={(e) => setDatabaseName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Type</Form.Label>
-            <Form.Control
-              as="select"
-              onChange={(e) => setDatabaseTypeId(parseInt(e.target.value))}
-            >
-              <option>Select database type</option>
-              {databaseTypes.map((databaseType) => (
-                <option key={databaseType.id} value={databaseType.id}>
-                  {databaseType.name}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Server</Form.Label>
-            <Form.Control
-              as="select"
-              onChange={(e) => setDatabaseServerId(parseInt(e.target.value))}
-            >
-              <option>Select database server</option>
-              {databaseServers.map((databaseServer) => (
-                <option key={databaseServer.id} value={databaseServer.id}>
-                  {databaseServer.name}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Status</Form.Label>
-            <Form.Control
-              as="select"
-              onChange={(e) => setDatabaseStatus(parseInt(e.target.value))}
-            >
-              <option>Select database status</option>
-              <option value={1}>Active</option>
-              <option value={2}>Inactive</option>
-            </Form.Control>
-          </Form.Group>
+        <Form
+          key={show ? 'new' : 'reset'}
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Add Database"
+          loadingText="Adding Database..."
+          successMessage="Database added successfully!"
+        >
+          <FormField
+            name="name"
+            label="Database Name"
+            required
+            icon={<FaDatabase />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique name for the database"
+          />
+
+          <FormField
+            name="typeId"
+            label="Database Type"
+            type="select"
+            required
+            icon={<FaDatabase />}
+            validate={required}
+            helpText="Select the type of database"
+            options={databaseTypes.map(type => ({
+              value: type.id?.toString() || '',
+              label: type.name || ''
+            }))}
+          />
+
+          <FormField
+            name="serverId"
+            label="Database Server"
+            type="select"
+            required={databaseServers.length > 1}
+            icon={<FaServer />}
+            validate={databaseServers.length > 1 ? required : undefined}
+            helpText={databaseServers.length === 1 ? "Only one server available" : "Select the server for this database"}
+            options={databaseServers.map(server => ({
+              value: server.id?.toString() || '',
+              label: server.name || ''
+            }))}
+          />
+
+          <FormField
+            name="status"
+            label="Status"
+            type="select"
+            required
+            icon={<FaCheck />}
+            validate={required}
+            helpText="Select the status of the database"
+            options={[
+              { value: "1", label: "Active" },
+              { value: "2", label: "Inactive" }
+            ]}
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={addDatabase}>
-          Add Database
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }
@@ -262,7 +331,7 @@ function AddDatabaseModal({
 function UpdateDatabaseModal({
   show,
   handleClose,
-  selectedDatabase,
+  database,
   databases,
   setDatabases,
   databaseTypes,
@@ -270,73 +339,58 @@ function UpdateDatabaseModal({
 }: {
   show: boolean;
   handleClose: () => void;
-  selectedDatabase: Database;
+  database: Database | null;
   databases: Database[];
   setDatabases: (databases: Database[]) => void;
   databaseTypes: DatabaseType[];
   databaseServers: DatabaseServer[];
 }) {
-  const [databaseName, setDatabaseName] = useState(selectedDatabase.name || "");
-  const [databaseTypeId, setDatabaseTypeId] = useState<number | null>(
-    selectedDatabase.type?.id || null
-  );
-  const [databaseServerId, setDatabaseServerId] = useState<number | null>(
-    selectedDatabase.server?.id || null
-  );
-  const [databaseStatus, setDatabaseStatus] = useState<number | null>(
-    selectedDatabase.status || null
-  );
-  const [useTrustedConnection, setUseTrustedConnection] = useState(
-    selectedDatabase.useTrustedConnection!
-  );
+  if (!database) return null;
 
-  useEffect(() => {
-    setDatabaseName(selectedDatabase.name || "");
-    setDatabaseTypeId(selectedDatabase.type?.id || null);
-    setDatabaseServerId(selectedDatabase.server?.id || null);
-    setDatabaseStatus(selectedDatabase.status || null);
-    setUseTrustedConnection(selectedDatabase.useTrustedConnection!);
-  }, [selectedDatabase]);
+  const initialValues = {
+    name: database.name || "",
+    typeId: database.type?.id?.toString() || "",
+    serverId: database.server?.id?.toString() || "",
+    status: database.status?.toString() || "1",
+  };
 
-  function updateDatabase() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.database
-      .updateDatabaseUpdate({
-        databaseId: selectedDatabase.id!,
-        databaseName: databaseName,
-        databaseServerId: databaseServerId!,
-        databaseTypeId: databaseTypeId!,
-        databaseStatus: databaseStatus!,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const newDatabases = databases.map((database) => {
-            if (database.id === selectedDatabase.id) {
-              return {
-                ...database,
-                name: databaseName,
-                server: databaseServers.find((s) => s.id === databaseServerId)!,
-                type: databaseTypes.find((t) => t.id === databaseTypeId)!,
-                status: databaseStatus!,
-                useTrustedConnection: useTrustedConnection,
-              };
-            }
-            return database;
-          });
-          setDatabases(newDatabases);
-
-          handleClose();
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.database.updateDatabaseUpdate({
+        databaseId: database.id!,
+        databaseName: values.name,
+        databaseTypeId: parseInt(values.typeId),
+        databaseServerId: parseInt(values.serverId),
+        databaseStatus: parseInt(values.status),
       });
-  }
+
+      if (response.status === 200) {
+        const updatedDatabase: Database = {
+          id: database.id,
+          name: values.name,
+          type: databaseTypes.find(t => t.id === parseInt(values.typeId))!,
+          server: databaseServers.find(s => s.id === parseInt(values.serverId))!,
+          status: parseInt(values.status),
+        };
+
+        const newDatabases = databases.map((d) =>
+          d.id === updatedDatabase.id ? updatedDatabase : d
+        );
+
+        setDatabases(newDatabases);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
@@ -344,76 +398,65 @@ function UpdateDatabaseModal({
         <Modal.Title>Update Database</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter database name"
-              value={databaseName}
-              onChange={(e) => setDatabaseName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Type</Form.Label>
-            <Form.Control
-              as="select"
-              value={databaseTypeId?.toString() || ""}
-              onChange={(e) => setDatabaseTypeId(e.target.value ? parseInt(e.target.value) : null)}
-            >
-              <option value="">Select database type</option>
-              {databaseTypes.map((databaseType) => (
-                <option key={databaseType.id} value={databaseType.id}>
-                  {databaseType.name}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Server</Form.Label>
-            <Form.Control
-              as="select"
-              value={databaseServerId?.toString() || ""}
-              onChange={(e) => setDatabaseServerId(e.target.value ? parseInt(e.target.value) : null)}
-            >
-              <option value="">Select database server</option>
-              {databaseServers.map((databaseServer) => (
-                <option key={databaseServer.id} value={databaseServer.id}>
-                  {databaseServer.name}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Status</Form.Label>
-            <Form.Control
-              as="select"
-              value={databaseStatus?.toString() || ""}
-              onChange={(e) => setDatabaseStatus(e.target.value ? parseInt(e.target.value) : null)}
-            >
-              <option value="">Select database status</option>
-              <option value={1}>Active</option>
-              <option value={2}>Inactive</option>
-            </Form.Control>
-          </Form.Group>
-          <Form.Group>
-            <Form.Check
-              type="checkbox"
-              label="Use Trusted Connection"
-              checked={useTrustedConnection}
-              onChange={(e) => setUseTrustedConnection(e.target.checked)}
-            />
-          </Form.Group>
+        <Form
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Update Database"
+          loadingText="Updating Database..."
+          successMessage="Database updated successfully!"
+        >
+          <FormField
+            name="name"
+            label="Database Name"
+            required
+            icon={<FaDatabase />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique name for the database"
+          />
+
+          <FormField
+            name="typeId"
+            label="Database Type"
+            type="select"
+            required
+            icon={<FaDatabase />}
+            validate={required}
+            helpText="Select the type of database"
+            options={databaseTypes.map(type => ({
+              value: type.id?.toString() || '',
+              label: type.name || ''
+            }))}
+          />
+
+          <FormField
+            name="serverId"
+            label="Database Server"
+            type="select"
+            required
+            icon={<FaServer />}
+            validate={required}
+            helpText="Select the server for this database"
+            options={databaseServers.map(server => ({
+              value: server.id?.toString() || '',
+              label: server.name || ''
+            }))}
+          />
+
+          <FormField
+            name="status"
+            label="Status"
+            type="select"
+            required
+            icon={<FaCheck />}
+            validate={required}
+            helpText="Select the status of the database"
+            options={[
+              { value: "1", label: "Active" },
+              { value: "2", label: "Inactive" }
+            ]}
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={updateDatabase}>
-          Update
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }

@@ -1,24 +1,19 @@
 import Table from "react-bootstrap/Table";
 import { Api, Tenant } from "../api";
 import { useState, useEffect } from "react";
-import { Trash, GearFill } from "react-bootstrap-icons";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Trash, Pencil } from "react-bootstrap-icons";
+import { Button, Modal, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
+import Form from "../components/forms/Form";
+import FormField from "../components/forms/FormField";
+import { FaBuilding, FaPlus, FaHashtag } from "react-icons/fa";
+import { composeValidators, required, minLength } from "../utils/validation";
 
 function Tenants() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
-
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleCloseAddModal = () => setShowAddModal(false);
-  const handleShowAddModal = () => setShowAddModal(true);
-
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const handleCloseUpdateModal = () => setShowUpdateModal(false);
-  const handleShowUpdateModal = (tenant: Tenant) => {
-    setSelectedTenant(tenant);
-    setShowUpdateModal(true);
-  };
 
   useEffect(() => {
     const api = new Api({
@@ -39,7 +34,9 @@ function Tenants() {
       .deleteTenantDelete({ tenantId: id })
       .then((response) => {
         if (response.status === 200) {
-          const newTenants = tenants.filter((tenant) => tenant.id !== id);
+          const newTenants = tenants.filter(
+            (tenant) => tenant.id !== id
+          );
           setTenants(newTenants);
         }
       })
@@ -52,64 +49,122 @@ function Tenants() {
 
   return (
     <>
-      <div>
-        <h1>Tenants</h1>
-        <p>
-          Tenants can be organizations or other entities that use your
-          application. You can add, update, and delete tenants.
+      <div className="mb-4">
+        <h1 className="display-4 mb-3">Tenants</h1>
+        <p className="lead text-muted">
+          Manage your tenants. Add new tenants or modify existing ones.
         </p>
-        <Button className="btn btn-primary" onClick={handleShowAddModal}>
-          Add Tenant
+        <Button 
+          variant="primary" 
+          onClick={() => setShowAddModal(true)}
+          className="d-flex align-items-center gap-2"
+        >
+          <FaPlus /> Add New Tenant
         </Button>
         <AddTenantModal
           show={showAddModal}
-          handleClose={handleCloseAddModal}
+          handleClose={() => setShowAddModal(false)}
           tenants={tenants}
           setTenants={setTenants}
         />
       </div>
-      <Table striped border={1} hover>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Code</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {tenants.map((tenant) => (
-            <tr key={tenant.id}>
-              <td>{tenant.name}</td>
-              <td>{tenant.code}</td>
-              <td>{tenant.status === 1 ? "Active" : "Inactive"}</td>
-              <td>
-                <Trash
-                  size={30}
-                  color="red"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => deleteTenant(tenant.id!)}
-                />
-                <GearFill
-                  size={20}
-                  color="gray"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleShowUpdateModal(tenant)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      {selectedTenant && (
-        <UpdateTenantModal
-          show={showUpdateModal}
-          handleClose={handleCloseUpdateModal}
-          selectedTenant={selectedTenant}
-          tenants={tenants}
-          setTenants={setTenants}
-        />
-      )}
+      <div className="card shadow-sm">
+        <div className="card-body p-0">
+          <Table 
+            hover 
+            responsive 
+            className="mb-0"
+            style={{
+              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
+              '--bs-table-hover-color': 'inherit',
+            } as any}
+          >
+            <thead className="bg-light">
+              <tr>
+                <th className="border-0 px-4 py-3">Name</th>
+                <th className="border-0 px-4 py-3">Code</th>
+                <th className="border-0 px-4 py-3">Status</th>
+                <th className="border-0 px-4 py-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tenants.map((tenant) => (
+                <tr key={tenant.id} className="align-middle">
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaBuilding className="text-primary" />
+                      <span>{tenant.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaHashtag className="text-info" />
+                      <span>{tenant.code || 'Not specified'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge bg={tenant.status === 1 ? "success" : "warning"} className="px-3 py-2">
+                      {tenant.status === 1 ? "Active" : "Inactive"}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-end">
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => {
+                          setSelectedTenant(tenant);
+                          setShowUpdateModal(true);
+                        }}
+                      >
+                        <Pencil size={16} />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => deleteTenant(tenant.id!)}
+                      >
+                        <Trash size={16} />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {tenants.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center gap-2">
+                      <FaBuilding size={32} />
+                      <p className="mb-0">No tenants found</p>
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm"
+                        onClick={() => setShowAddModal(true)}
+                      >
+                        Create your first tenant
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </div>
+      <UpdateTenantModal
+        show={showUpdateModal}
+        handleClose={() => {
+          setShowUpdateModal(false);
+          setSelectedTenant(null);
+        }}
+        tenant={selectedTenant}
+        tenants={tenants}
+        setTenants={setTenants}
+      />
     </>
   );
 }
@@ -125,91 +180,84 @@ function AddTenantModal({
   tenants: Tenant[];
   setTenants: (tenants: Tenant[]) => void;
 }) {
-  const [name, setName] = useState("");
-  const [code, setCode] = useState("");
-  const [status, setStatus] = useState(1);
+  const initialValues = {
+    name: "",
+    code: "",
+    status: "1",
+  };
 
-  function addTenant() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    const tenant: Tenant = {
-      id: 0,
-      name: name,
-      code: code,
-      status: status,
-    };
-
-    api.tenant
-      .addTenantCreate({
-        tenantName: name,
-        tenantCode: code,
-        tenantStatus: status,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          tenant.id = response.data;
-
-          setTenants([...tenants, tenant]);
-          handleClose();
-
-          setName("");
-          setCode("");
-          setStatus(1);
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.tenant.addTenantCreate({
+        tenantName: values.name,
+        tenantCode: values.code,
+        tenantStatus: parseInt(values.status),
       });
-  }
+
+      if (response.status === 200) {
+        const newTenant: Tenant = {
+          id: response.data!,
+          name: values.name,
+          code: values.code,
+          status: parseInt(values.status),
+        };
+        setTenants([...tenants, newTenant]);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>Add Tenant</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Code</Form.Label>
-            <Form.Control
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Status</Form.Label>
-            <Form.Control
-              as="select"
-              value={status}
-              onChange={(e) => setStatus(Number(e.target.value))}
-            >
-              <option value="1">Active</option>
-              <option value="2">Inactive</option>
-            </Form.Control>
-          </Form.Group>
+        <Form
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Add Tenant"
+          loadingText="Adding Tenant..."
+          successMessage="Tenant added successfully!"
+        >
+          <FormField
+            name="name"
+            label="Tenant Name"
+            required
+            icon={<FaBuilding />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique name for the tenant"
+          />
+          <FormField
+            name="code"
+            label="Tenant Code"
+            required
+            icon={<FaHashtag />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique code for the tenant"
+          />
+          <FormField
+            name="status"
+            label="Status"
+            type="select"
+            required
+            options={[
+              { value: "1", label: "Active" },
+              { value: "2", label: "Inactive" }
+            ]}
+            helpText="Select the tenant's status"
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={addTenant}>
-          Save
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }
@@ -217,107 +265,102 @@ function AddTenantModal({
 function UpdateTenantModal({
   show,
   handleClose,
-  selectedTenant,
+  tenant,
   tenants,
   setTenants,
 }: {
   show: boolean;
   handleClose: () => void;
-  selectedTenant: Tenant;
+  tenant: Tenant | null;
   tenants: Tenant[];
   setTenants: (tenants: Tenant[]) => void;
 }) {
-  useEffect(() => {
-    setName(selectedTenant.name);
-    setCode(selectedTenant.code);
-    setStatus(selectedTenant.status);
-  }, [selectedTenant]);
+  if (!tenant) return null;
 
-  const [name, setName] = useState(selectedTenant.name);
-  const [code, setCode] = useState(selectedTenant.code);
-  const [status, setStatus] = useState(selectedTenant.status);
+  const initialValues = {
+    name: tenant.name || "",
+    code: tenant.code || "",
+    status: tenant.status?.toString() || "1",
+  };
 
-  function updateTenant() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.tenant
-      .updateTenantUpdate({
-        tenantId: selectedTenant.id!,
-        tenantName: name!,
-        tenantCode: code!,
-        tenantStatus: status!,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const newTenants = tenants.map((tenant) => {
-            if (tenant.id === selectedTenant.id) {
-              return {
-                ...tenant,
-                name: name,
-                code: code,
-                status: status,
-              };
-            }
-            return tenant;
-          });
-
-          setTenants(newTenants);
-          handleClose();
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.tenant.updateTenantUpdate({
+        tenantId: tenant.id!,
+        tenantName: values.name,
+        tenantCode: values.code,
+        tenantStatus: parseInt(values.status),
       });
-  }
+
+      if (response.status === 200) {
+        const updatedTenant: Tenant = {
+          id: tenant.id,
+          name: values.name,
+          code: values.code,
+          status: parseInt(values.status),
+        };
+
+        const newTenants = tenants.map((t) =>
+          t.id === updatedTenant.id ? updatedTenant : t
+        );
+
+        setTenants(newTenants);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>Update Tenant</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              value={name!}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Code</Form.Label>
-            <Form.Control
-              type="text"
-              value={code!}
-              onChange={(e) => setCode(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Status</Form.Label>
-            <Form.Control
-              as="select"
-              value={status}
-              onChange={(e) => setStatus(Number(e.target.value))}
-            >
-              <option value="1">Active</option>
-              <option value="2">Inactive</option>
-            </Form.Control>
-          </Form.Group>
+        <Form
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Update Tenant"
+          loadingText="Updating Tenant..."
+          successMessage="Tenant updated successfully!"
+        >
+          <FormField
+            name="name"
+            label="Tenant Name"
+            required
+            icon={<FaBuilding />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique name for the tenant"
+          />
+          <FormField
+            name="code"
+            label="Tenant Code"
+            required
+            icon={<FaHashtag />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique code for the tenant"
+          />
+          <FormField
+            name="status"
+            label="Status"
+            type="select"
+            required
+            options={[
+              { value: "1", label: "Active" },
+              { value: "2", label: "Inactive" }
+            ]}
+            helpText="Select the tenant's status"
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={updateTenant}>
-          Save
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }

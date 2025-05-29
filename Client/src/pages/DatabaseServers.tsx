@@ -1,9 +1,14 @@
 import Table from "react-bootstrap/Table";
 import { Api, DatabaseServer } from "../api";
 import { useState, useEffect } from "react";
-import { Trash, GearFill } from "react-bootstrap-icons";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Trash, Pencil } from "react-bootstrap-icons";
+import { Button, Modal, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
+import Form from "../components/forms/Form";
+import FormField from "../components/forms/FormField";
+import CheckboxField from "../components/forms/CheckboxField";
+import { FaServer, FaNetworkWired, FaGlobe, FaLink, FaPlus, FaCheck, FaTimes, FaHashtag } from "react-icons/fa";
+import { composeValidators, required, minLength } from "../utils/validation";
 
 function DatabaseServers() {
   const [databaseServers, setDatabaseServers] = useState<DatabaseServer[]>([]);
@@ -55,69 +60,127 @@ function DatabaseServers() {
 
   return (
     <>
-      <div>
-        <h1>Database Servers</h1>
-        <p>
-          Database servers are the physical or virtual machines that host your
-          databases. You can add, update, and delete database servers. 
-          (This won't create a new database server, but will add it to the list of available servers in the application.)
-          <br />
-          You can connect by host name, domain name, or IP address.
+      <div className="mb-4">
+        <h1 className="display-4 mb-3">Database Servers</h1>
+        <p className="lead text-muted">
+          Manage your database server instances. Add new servers or modify existing ones.
         </p>
-        <Button variant="primary" onClick={handleShowAddModal}>
-          Add Database Server
+        <Button 
+          variant="primary" 
+          onClick={() => setShowAddModal(true)}
+          className="d-flex align-items-center gap-2"
+        >
+          <FaPlus /> Add New Server
         </Button>
         <AddDatabaseServerModal
           show={showAddModal}
-          handleClose={handleCloseAddModal}
+          handleClose={() => setShowAddModal(false)}
           databaseServers={databaseServers}
-          setDataServers={setDatabaseServers}
+          setDatabaseServers={setDatabaseServers}
         />
       </div>
-      <Table striped border={1} hover>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>IP Address</th>
-            <th>Host Name</th>
-            <th>Domain Name</th>
-            <th>Linked Server</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {databaseServers.map((databaseServer) => (
-            <tr key={databaseServer.id}>
-              <td>{databaseServer.name}</td>
-              <td>{databaseServer.ipAddress}</td>
-              <td>{databaseServer.hostName}</td>
-              <td>{databaseServer.fullyQualifiedDomainName}</td>
-              <td>{databaseServer.isLinkedServer ? "Yes" : "No"}</td>
-              <td>
-                <Trash
-                  size={30}
-                  color="red"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => deleteDatabaseServer(databaseServer.id!)}
-                />
-                <GearFill
-                  size={20}
-                  color="gray"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleShowUpdateModal(databaseServer)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <div className="card shadow-sm">
+        <div className="card-body p-0">
+          <Table 
+            hover 
+            responsive 
+            className="mb-0"
+            style={{
+              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
+              '--bs-table-hover-color': 'inherit',
+            } as any}
+          >
+            <thead className="bg-light">
+              <tr>
+                <th className="border-0 px-4 py-3">Name</th>
+                <th className="border-0 px-4 py-3">Host</th>
+                <th className="border-0 px-4 py-3">IP Address</th>
+                <th className="border-0 px-4 py-3">FQDN</th>
+                <th className="border-0 px-4 py-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {databaseServers.map((server) => (
+                <tr key={server.id} className="align-middle">
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaServer className="text-primary" />
+                      <span>{server.name || 'Not specified'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaNetworkWired className="text-info" />
+                      <span>{server.hostName || 'Not specified'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaNetworkWired className="text-info" />
+                      <span>{server.ipAddress || 'Not specified'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaGlobe className="text-success" />
+                      <span>{server.fullyQualifiedDomainName || 'Not specified'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-end">
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => {
+                          setSelectedDatabaseServer(server);
+                          setShowUpdateModal(true);
+                        }}
+                      >
+                        <Pencil size={16} />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => deleteDatabaseServer(server.id!)}
+                      >
+                        <Trash size={16} />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {databaseServers.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center gap-2">
+                      <FaServer size={32} />
+                      <p className="mb-0">No database servers found</p>
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm"
+                        onClick={() => setShowAddModal(true)}
+                      >
+                        Create your first database server
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </div>
       {selectedDatabaseServer && (
         <UpdateDatabaseServerModal
           show={showUpdateModal}
           handleClose={handleCloseUpdateModal}
-          selectedDatabaseServer={selectedDatabaseServer!}
+          server={selectedDatabaseServer}
           databaseServers={databaseServers}
-          setDataServers={setDatabaseServers}
+          setDatabaseServers={setDatabaseServers}
         />
       )}
     </>
@@ -128,105 +191,98 @@ function AddDatabaseServerModal({
   show,
   handleClose,
   databaseServers,
-  setDataServers,
+  setDatabaseServers,
 }: {
   show: boolean;
   handleClose: () => void;
   databaseServers: DatabaseServer[];
-  setDataServers: (setDataServers: DatabaseServer[]) => void;
+  setDatabaseServers: (servers: DatabaseServer[]) => void;
 }) {
-  const [serverName, setServerName] = useState("");
-  const [ipAddress, setIpAddress] = useState("");
-  const [hostName, setHostName] = useState("");
-  const [fullyQualifiedDomainName, setFullyQualifiedDomainName] = useState("");
-  const [isLinkedServer, setIsLinkedServer] = useState(false);
+  const initialValues = {
+    serverName: "",
+    databaseServerHostName: "",
+    serverIpAddress: "",
+    serverFullyQualifiedDomainName: "",
+  };
 
-  function addDatabaseServer() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.databaseServer
-      .addDatabaseServerCreate({
-        databaseServerName: serverName,
-        databaseServerIpAddress: ipAddress,
-        databaseServerHostName: hostName,
-        databaseServerFullyQualifiedDomainName: fullyQualifiedDomainName,
-        isLinkedServer: isLinkedServer,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const newDatabaseServer: DatabaseServer = {
-            id: response.data,
-            name: serverName,
-            ipAddress,
-            hostName,
-            fullyQualifiedDomainName,
-            isLinkedServer,
-          };
-          setDataServers([...databaseServers, newDatabaseServer]);
-          handleClose();
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.databaseServer.addDatabaseServerCreate({
+        databaseServerName: values.serverName,
+        databaseServerHostName: values.databaseServerHostName,
+        databaseServerIpAddress: values.serverIpAddress,
+        databaseServerFullyQualifiedDomainName: values.serverFullyQualifiedDomainName,
       });
-  }
+
+      if (response.status === 200) {
+        const newServer: DatabaseServer = {
+          id: response.data!,
+          name: values.serverName,
+          hostName: values.databaseServerHostName,
+          ipAddress: values.serverIpAddress,
+          fullyQualifiedDomainName: values.serverFullyQualifiedDomainName,
+        };
+        setDatabaseServers([...databaseServers, newServer]);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>Add Database Server</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Server Name</Form.Label>
-            <Form.Control
-              type="text"
-              onChange={(e) => setServerName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>IP Address</Form.Label>
-            <Form.Control
-              type="text"
-              onChange={(e) => setIpAddress(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Host Name</Form.Label>
-            <Form.Control
-              type="text"
-              onChange={(e) => setHostName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Domain Name</Form.Label>
-            <Form.Control
-              type="text"
-              onChange={(e) => setFullyQualifiedDomainName(e.target.value)}
-            />
-          </Form.Group>
-        </Form>
-        <Form.Group>
-          <Form.Check
-            type="checkbox"
-            label="Is Linked Server"
-            onChange={(e) => setIsLinkedServer(e.target.checked)}
+        <Form
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Add Database Server"
+          loadingText="Adding Database Server..."
+          successMessage="Database server added successfully!"
+        >
+          <FormField
+            name="serverName"
+            label="Server Name"
+            required
+            icon={<FaServer />}
+            validate={required}
+            helpText="Enter a name for the database server"
           />
-        </Form.Group>
+
+          <FormField
+            name="databaseServerHostName"
+            label="Host"
+            required
+            icon={<FaNetworkWired />}
+            validate={required}
+            helpText="Enter the host address (e.g., localhost, 127.0.0.1)"
+          />
+
+          <FormField
+            name="serverIpAddress"
+            label="IP Address"
+            icon={<FaNetworkWired />}
+            helpText="Enter the IP address of the server"
+          />
+
+          <FormField
+            name="serverFullyQualifiedDomainName"
+            label="FQDN"
+            icon={<FaGlobe />}
+            helpText="Enter the fully qualified domain name"
+          />
+        </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={addDatabaseServer}>
-          Add
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }
@@ -234,115 +290,109 @@ function AddDatabaseServerModal({
 function UpdateDatabaseServerModal({
   show,
   handleClose,
-  selectedDatabaseServer,
+  server,
   databaseServers,
-  setDataServers,
+  setDatabaseServers,
 }: {
   show: boolean;
   handleClose: () => void;
-  selectedDatabaseServer: DatabaseServer;
+  server: DatabaseServer | null;
   databaseServers: DatabaseServer[];
-  setDataServers: (databaseServers: DatabaseServer[]) => void;
+  setDatabaseServers: (servers: DatabaseServer[]) => void;
 }) {
-  const [name, setName] = useState(selectedDatabaseServer.name);
-  const [ipAddress, setIpAddress] = useState(selectedDatabaseServer.ipAddress);
-  const [hostName, setHostName] = useState(selectedDatabaseServer.hostName);
-  const [fullyQualifiedDomainName, setFullyQualifiedDomainName] = useState(
-    selectedDatabaseServer.fullyQualifiedDomainName
-  );
+  if (!server) return null;
 
-  useEffect(() => {
-    setName(selectedDatabaseServer.name);
-    setIpAddress(selectedDatabaseServer.ipAddress);
-    setHostName(selectedDatabaseServer.hostName);
-    setFullyQualifiedDomainName(selectedDatabaseServer.fullyQualifiedDomainName);
-  }, [selectedDatabaseServer]);
+  const initialValues = {
+    serverName: server.name || "",
+    databaseServerHostName: server.hostName || "",
+    serverIpAddress: server.ipAddress || "",
+    serverFullyQualifiedDomainName: server.fullyQualifiedDomainName || "",
+  };
 
-  function updateDatabaseServer() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.databaseServer
-      .updateDatabaseServerUpdate({
-        databaseServerId: selectedDatabaseServer.id!,
-        databaseServerName: name!,
-        databaseServerIpAddress: ipAddress!,
-        databaseServerHostName: hostName!,
-        databaseServerFullyQualifiedDomainName: fullyQualifiedDomainName!,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const newDatabaseServers = databaseServers.map((databaseServer) => {
-            if (databaseServer.id === selectedDatabaseServer.id) {
-              return {
-                id: selectedDatabaseServer.id,
-                name,
-                ipAddress,
-              };
-            }
-            return databaseServer;
-          });
-          setDataServers(newDatabaseServers);
-          handleClose();
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.databaseServer.updateDatabaseServerUpdate({
+        serverId: server.id!,
+        databaseServerName: values.serverName,
+        databaseServerHostName: values.databaseServerHostName,
+        databaseServerIpAddress: values.serverIpAddress,
+        databaseServerFullyQualifiedDomainName: values.serverFullyQualifiedDomainName,
       });
-  }
+
+      if (response.status === 200) {
+        const updatedServer: DatabaseServer = {
+          id: server.id,
+          name: values.serverName,
+          hostName: values.databaseServerHostName,
+          ipAddress: values.serverIpAddress,
+          fullyQualifiedDomainName: values.serverFullyQualifiedDomainName,
+        };
+
+        const newServers = databaseServers.map((s) =>
+          s.id === updatedServer.id ? updatedServer : s
+        );
+
+        setDatabaseServers(newServers);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>Update Database Server</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              value={name!}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>IP Address</Form.Label>
-            <Form.Control
-              type="text"
-              value={ipAddress!}
-              onChange={(e) => setIpAddress(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Host Name</Form.Label>
-            <Form.Control
-              type="text"
-              value={hostName!}
-              onChange={(e) => setHostName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Domain Name</Form.Label>
-            <Form.Control
-              type="text"
-              value={fullyQualifiedDomainName!}
-              onChange={(e) => setFullyQualifiedDomainName(e.target.value)}
-            />
-          </Form.Group>
+        <Form
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Update Database Server"
+          loadingText="Updating Database Server..."
+          successMessage="Database server updated successfully!"
+        >
+          <FormField
+            name="serverName"
+            label="Server Name"
+            required
+            icon={<FaServer />}
+            validate={required}
+            helpText="Enter a name for the database server"
+          />
+
+          <FormField
+            name="databaseServerHostName"
+            label="Host"
+            required
+            icon={<FaNetworkWired />}
+            validate={required}
+            helpText="Enter the host address (e.g., localhost, 127.0.0.1)"
+          />
+
+          <FormField
+            name="serverIpAddress"
+            label="IP Address"
+            icon={<FaNetworkWired />}
+            helpText="Enter the IP address of the server"
+          />
+
+          <FormField
+            name="serverFullyQualifiedDomainName"
+            label="FQDN"
+            icon={<FaGlobe />}
+            helpText="Enter the fully qualified domain name"
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={updateDatabaseServer}>
-          Save changes
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }

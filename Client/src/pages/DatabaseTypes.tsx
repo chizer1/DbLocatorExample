@@ -1,25 +1,19 @@
+import { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
 import { Api, DatabaseType } from "../api";
-import { useState, useEffect } from "react";
-import { Trash, GearFill } from "react-bootstrap-icons";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Trash, Pencil } from "react-bootstrap-icons";
+import { Button, Modal, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
+import Form from "../components/forms/Form";
+import FormField from "../components/forms/FormField";
+import { FaDatabase, FaCode, FaPlus, FaCheck, FaTimes } from "react-icons/fa";
+import { composeValidators, required, minLength } from "../utils/validation";
 
 function DatabaseTypes() {
   const [databaseTypes, setDatabaseTypes] = useState<DatabaseType[]>([]);
-  const [selectedDatabaseType, setSelectedDatabaseType] =
-    useState<DatabaseType | null>(null);
-
+  const [selectedDatabaseType, setSelectedDatabaseType] = useState<DatabaseType | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleCloseAddModal = () => setShowAddModal(false);
-  const handleShowAddModal = () => setShowAddModal(true);
-
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const handleCloseUpdateModal = () => setShowUpdateModal(false);
-  const handleShowUpdateModal = (databaseType: DatabaseType) => {
-    setSelectedDatabaseType(databaseType);
-    setShowUpdateModal(true);
-  };
 
   useEffect(() => {
     const api = new Api({
@@ -46,7 +40,7 @@ function DatabaseTypes() {
           setDatabaseTypes(newDatabaseTypes);
         }
       })
-      .catch(async (error) => {
+      .catch((error) => {
         toast.error(error.toString(), {
           autoClose: false,
         });
@@ -55,58 +49,109 @@ function DatabaseTypes() {
 
   return (
     <>
-      <div>
-        <h1>Database Types</h1>
-        <p>
-          Database Types can help provision seperate logical databases for each
-          kind of workload. You can add, update, and delete database types.
+      <div className="mb-4">
+        <h1 className="display-4 mb-3">Database Types</h1>
+        <p className="lead text-muted">
+          Manage your database types. Add new types or modify existing ones.
         </p>
-        <Button onClick={handleShowAddModal}>Add Database Type</Button>
+        <Button 
+          variant="primary" 
+          onClick={() => setShowAddModal(true)}
+          className="d-flex align-items-center gap-2"
+        >
+          <FaPlus /> Add New Type
+        </Button>
         <AddDatabaseTypeModal
           show={showAddModal}
-          handleClose={handleCloseAddModal}
-          databaseTypes={databaseTypes}
-          setDataTypes={setDatabaseTypes}
-        />
-      </div>
-      <Table striped border={1} hover>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {databaseTypes.map((databaseType) => (
-            <tr key={databaseType.id}>
-              <td>{databaseType.name}</td>
-              <td>
-                <Trash
-                  size={30}
-                  color="red"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => deleteDatabaseType(databaseType.id!)}
-                />
-                <GearFill
-                  size={20}
-                  color="gray"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleShowUpdateModal(databaseType)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      {selectedDatabaseType && (
-        <UpdateDatabaseTypeModal
-          show={showUpdateModal}
-          handleClose={handleCloseUpdateModal}
-          selectedDatabaseType={selectedDatabaseType}
+          handleClose={() => setShowAddModal(false)}
           databaseTypes={databaseTypes}
           setDatabaseTypes={setDatabaseTypes}
         />
-      )}
+      </div>
+      <div className="card shadow-sm">
+        <div className="card-body p-0">
+          <Table 
+            hover 
+            responsive 
+            className="mb-0"
+            style={{
+              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
+              '--bs-table-hover-color': 'inherit',
+            } as any}
+          >
+            <thead className="bg-light">
+              <tr>
+                <th className="border-0 px-4 py-3">Name</th>
+                <th className="border-0 px-4 py-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {databaseTypes.map((type) => (
+                <tr key={type.id} className="align-middle">
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaDatabase className="text-primary" />
+                      <span>{type.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-end">
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => {
+                          setSelectedDatabaseType(type);
+                          setShowUpdateModal(true);
+                        }}
+                      >
+                        <Pencil size={16} />
+                        <span>Edit</span>
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => deleteDatabaseType(type.id!)}
+                      >
+                        <Trash size={16} />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {databaseTypes.length === 0 && (
+                <tr>
+                  <td colSpan={2} className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center gap-2">
+                      <FaDatabase size={32} />
+                      <p className="mb-0">No database types found</p>
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm"
+                        onClick={() => setShowAddModal(true)}
+                      >
+                        Create your first database type
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </div>
+      <UpdateDatabaseTypeModal
+        show={showUpdateModal}
+        handleClose={() => {
+          setShowUpdateModal(false);
+          setSelectedDatabaseType(null);
+        }}
+        type={selectedDatabaseType}
+        databaseTypes={databaseTypes}
+        setDatabaseTypes={setDatabaseTypes}
+      />
     </>
   );
 }
@@ -115,68 +160,66 @@ function AddDatabaseTypeModal({
   show,
   handleClose,
   databaseTypes,
-  setDataTypes,
+  setDatabaseTypes,
 }: {
   show: boolean;
   handleClose: () => void;
   databaseTypes: DatabaseType[];
-  setDataTypes: (databaseTypes: DatabaseType[]) => void;
+  setDatabaseTypes: (types: DatabaseType[]) => void;
 }) {
-  const [name, setName] = useState("");
-
-  const databaseType: DatabaseType = {
-    id: 0,
-    name: name,
+  const initialValues = {
+    name: "",
   };
 
-  function addDatabaseType() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.databaseType
-      .addDatabaseTypeCreate({ databaseTypeName: name })
-      .then((response) => {
-        if (response.status === 200) {
-          databaseType.id = response.data;
-
-          setDataTypes([...databaseTypes, databaseType]);
-          handleClose();
-
-          setName("");
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.databaseType.addDatabaseTypeCreate({
+        databaseTypeName: values.name,
       });
-  }
+
+      if (response.status === 200) {
+        const newType: DatabaseType = {
+          id: response.data!,
+          name: values.name,
+        };
+        setDatabaseTypes([...databaseTypes, newType]);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>Add Database Type</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Form.Group>
+        <Form
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Add Database Type"
+          loadingText="Adding Database Type..."
+          successMessage="Database type added successfully!"
+        >
+          <FormField
+            name="name"
+            label="Database Type Name"
+            required
+            icon={<FaDatabase />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique name for the database type"
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={addDatabaseType}>
-          Save changes
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }
@@ -184,82 +227,77 @@ function AddDatabaseTypeModal({
 function UpdateDatabaseTypeModal({
   show,
   handleClose,
-  selectedDatabaseType,
+  type,
   databaseTypes,
   setDatabaseTypes,
 }: {
   show: boolean;
   handleClose: () => void;
-  selectedDatabaseType: DatabaseType;
+  type: DatabaseType | null;
   databaseTypes: DatabaseType[];
-  setDatabaseTypes: (databaseTypes: DatabaseType[]) => void;
+  setDatabaseTypes: (types: DatabaseType[]) => void;
 }) {
-  useEffect(() => {
-    setName(selectedDatabaseType.name!);
-  }, [selectedDatabaseType]);
+  if (!type) return null;
 
-  const [name, setName] = useState(selectedDatabaseType.name!);
+  const initialValues = {
+    name: type.name || "",
+  };
 
-  function updateDatabaseType() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.databaseType
-      .updateDatabaseTypeUpdate({
-        databaseTypeId: selectedDatabaseType.id!,
-        databaseTypeName: name,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const updatedDatabaseType: DatabaseType = {
-            id: selectedDatabaseType.id,
-            name: name,
-          };
-
-          const newDatabaseTypes = databaseTypes.map((databaseType) =>
-            databaseType.id === selectedDatabaseType.id
-              ? updatedDatabaseType
-              : databaseType
-          );
-
-          setDatabaseTypes(newDatabaseTypes);
-
-          handleClose();
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.databaseType.updateDatabaseTypeUpdate({
+        databaseTypeId: type.id!,
+        databaseTypeName: values.name,
       });
-  }
+
+      if (response.status === 200) {
+        const updatedType: DatabaseType = {
+          id: type.id,
+          name: values.name,
+        };
+
+        const newTypes = databaseTypes.map((t) =>
+          t.id === updatedType.id ? updatedType : t
+        );
+
+        setDatabaseTypes(newTypes);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
 
   return (
     <Modal show={show} onHide={handleClose}>
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>Update Database Type</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Form.Group>
+        <Form
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Update Database Type"
+          loadingText="Updating Database Type..."
+          successMessage="Database type updated successfully!"
+        >
+          <FormField
+            name="name"
+            label="Database Type Name"
+            required
+            icon={<FaDatabase />}
+            validate={composeValidators(required, minLength(2))}
+            helpText="Enter a unique name for the database type"
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={updateDatabaseType}>
-          Save changes
-        </Button>
-      </Modal.Footer>
     </Modal>
   );
 }

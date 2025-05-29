@@ -7,4 +7,5 @@ public class UpdateDatabaseServerRequest
     public required string DatabaseServerIpAddress { get; set; }
     public required string DatabaseServerHostName { get; set; }
     public required string DatabaseServerFullyQualifiedDomainName { get; set; }
+    public bool IsLinkedServer { get; set; }
 }

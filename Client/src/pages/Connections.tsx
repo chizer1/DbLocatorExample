@@ -1,33 +1,35 @@
 import { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
 import { Api, Connection, Database, Tenant } from "../api";
-import { Trash } from "react-bootstrap-icons";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Trash, Pencil } from "react-bootstrap-icons";
+import { Button, Modal, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
+import Form from "../components/forms/Form";
+import FormField from "../components/forms/FormField";
+import SelectField from "../components/forms/SelectField";
+import { FaDatabase, FaServer, FaUser, FaKey, FaLink, FaEnvelope } from "react-icons/fa";
+import { composeValidators, required, minLength } from "../utils/validation";
+import { useForm } from "../components/forms/FormContext";
 
 function Connections() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [databases, setDatabases] = useState<Database[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
-
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleShowAddModal = () => setShowAddModal(true);
 
   useEffect(() => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.connection.getConnectionsList().then((response) => {
-      setConnections(response.data);
-    });
-
-    api.database.getDatabasesList().then((response) => {
-      setDatabases(response.data);
-    });
-
-    api.tenant.getTenantsList().then((response) => {
-      setTenants(response.data);
+    Promise.all([
+      api.connection.getConnectionsList(),
+      api.database.getDatabasesList(),
+      api.tenant.getTenantsList()
+    ]).then(([connectionsResponse, databasesResponse, tenantsResponse]) => {
+      setConnections(connectionsResponse.data);
+      setDatabases(databasesResponse.data);
+      setTenants(tenantsResponse.data);
     });
   }, []);
 
@@ -55,50 +57,96 @@ function Connections() {
 
   return (
     <>
-      <div>
-        <h1>Connections</h1>
-        <p>
-          Connections are the relationships between tenants and databases. They allow
-          tenants to access particular databases.
-          You can add and delete connections.
+      <div className="mb-4">
+        <h1 className="display-4 mb-3">Database Connections</h1>
+        <p className="lead text-muted">
+          Manage connections between tenants and databases. Create new connections or remove existing ones.
         </p>
-        <Button variant="primary" onClick={handleShowAddModal}>
-          Add Connection
+        <Button 
+          variant="primary" 
+          onClick={() => setShowAddModal(true)}
+          className="d-flex align-items-center gap-2"
+        >
+          <FaLink /> Add New Connection
         </Button>
         <AddConnectionModal
           show={showAddModal}
           handleClose={() => setShowAddModal(false)}
           connections={connections}
+          setConnections={setConnections}
           databases={databases}
           tenants={tenants}
-          setConnections={setConnections}
         />
       </div>
-      <Table striped border={1} hover>
-        <thead>
-          <tr>
-            <th>Tenant</th>
-            <th>Database</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {connections.map((connection) => (
-            <tr key={connection.id}>
-              <td>{connection.tenant?.name}</td>
-              <td>{connection.database?.name}</td>
-              <td>
-                <Trash
-                  size={30}
-                  color="red"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => deleteConnection(connection.id!)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <div className="card shadow-sm">
+        <div className="card-body p-0">
+          <Table 
+            hover 
+            responsive 
+            className="mb-0"
+            style={{
+              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
+              '--bs-table-hover-color': 'inherit',
+            } as any}
+          >
+            <thead className="bg-light">
+              <tr>
+                <th className="border-0 px-4 py-3">Tenant</th>
+                <th className="border-0 px-4 py-3">Database</th>
+                <th className="border-0 px-4 py-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {connections.map((connection) => (
+                <tr key={connection.id} className="align-middle">
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaUser className="text-primary" />
+                      <span>{connection.tenant?.name || 'Unknown Tenant'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaDatabase className="text-success" />
+                      <span>{connection.database?.name || 'Unknown Database'}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-end">
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => deleteConnection(connection.id!)}
+                      >
+                        <Trash size={16} />
+                        <span>Delete</span>
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {connections.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="text-center py-5 text-muted">
+                    <div className="d-flex flex-column align-items-center gap-2">
+                      <FaLink size={32} />
+                      <p className="mb-0">No connections found</p>
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm"
+                        onClick={() => setShowAddModal(true)}
+                      >
+                        Create your first connection
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      </div>
     </>
   );
 }
@@ -107,49 +155,59 @@ function AddConnectionModal({
   show,
   handleClose,
   connections,
+  setConnections,
   databases,
   tenants,
-  setConnections,
 }: {
   show: boolean;
   handleClose: () => void;
   connections: Connection[];
+  setConnections: (connections: Connection[]) => void;
   databases: Database[];
   tenants: Tenant[];
-  setConnections: (connections: Connection[]) => void;
 }) {
-  const [tenantId, setTenantId] = useState<number>();
-  const [databaseId, setDatabaseId] = useState<number>();
+  const initialValues = {
+    databaseId: "",
+    tenantId: "",
+  };
 
-  function addConnection() {
+  const handleSubmit = async (values: any) => {
     const api = new Api({
       baseURL: "http://localhost:5022",
     });
 
-    api.connection
-      .addConnectionCreate({
-        tenantId: tenantId!,
-        databaseId: databaseId!,
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const newConnection: Connection = {
-            id: response.data,
-            tenant: tenants.find((t) => t.id === tenantId)!,
-            database: databases.find((d) => d.id === databaseId)!,
-          };
-
-          setConnections([...connections, newConnection]);
-
-          handleClose();
-        }
-      })
-      .catch((error) => {
-        toast.error(error.toString(), {
-          autoClose: false,
-        });
+    try {
+      const response = await api.connection.addConnectionCreate({
+        databaseId: Number(values.databaseId),
+        tenantId: Number(values.tenantId),
       });
-  }
+
+      if (response.status === 200) {
+        const newConnection: Connection = {
+          id: response.data!,
+          database: databases.find(d => d.id === Number(values.databaseId))!,
+          tenant: tenants.find(t => t.id === Number(values.tenantId))!,
+        };
+        setConnections([...connections, newConnection]);
+        handleClose();
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        autoClose: false,
+      });
+    }
+  };
+
+  const databaseOptions = databases.map(db => ({
+    value: db.id!.toString(),
+    label: db.name || "Unnamed Database",
+  }));
+
+  const tenantOptions = tenants.map(tenant => ({
+    value: tenant.id!.toString(),
+    label: tenant.name || "Unnamed Tenant",
+  }));
 
   return (
     <Modal show={show} onHide={handleClose}>
@@ -157,46 +215,59 @@ function AddConnectionModal({
         <Modal.Title>Add Connection</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <Form.Group controlId="tenantId">
-            <Form.Label>Tenant</Form.Label>
-            <Form.Control
-              as="select"
-              onChange={(e) => setTenantId(parseInt(e.target.value))}
-            >
-              <option>Select Tenant</option>
-              {tenants.map((tenant) => (
-                <option key={tenant.id} value={tenant.id}>
-                  {tenant.name}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group controlId="databaseId">
-            <Form.Label>Database</Form.Label>
-            <Form.Control
-              as="select"
-              onChange={(e) => setDatabaseId(parseInt(e.target.value))}
-            >
-              <option>Select Database</option>
-              {databases.map((database) => (
-                <option key={database.id} value={database.id}>
-                  {database.name}
-                </option>
-              ))}
-            </Form.Control>
-          </Form.Group>
+        <Form
+          key={show ? 'new' : 'reset'}
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitText="Add Connection"
+          loadingText="Adding Connection..."
+          successMessage="Connection added successfully!"
+        >
+          <FormContent 
+            databaseOptions={databaseOptions}
+            tenantOptions={tenantOptions}
+          />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={addConnection}>
-          Add Connection
-        </Button>
-      </Modal.Footer>
     </Modal>
+  );
+}
+
+function FormContent({ 
+  databaseOptions, 
+  tenantOptions 
+}: { 
+  databaseOptions: { value: string; label: string; }[];
+  tenantOptions: { value: string; label: string; }[];
+}) {
+  const { resetForm } = useForm();
+
+  useEffect(() => {
+    resetForm();
+  }, []);
+
+  return (
+    <>
+      <SelectField
+        name="databaseId"
+        label="Database"
+        required
+        icon={<FaDatabase />}
+        options={databaseOptions}
+        validate={required}
+        helpText="Select the database to connect to"
+      />
+
+      <SelectField
+        name="tenantId"
+        label="Tenant"
+        required
+        icon={<FaUser />}
+        options={tenantOptions}
+        validate={required}
+        helpText="Select the tenant for this connection"
+      />
+    </>
   );
 }
 

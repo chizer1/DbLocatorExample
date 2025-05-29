@@ -128,6 +128,8 @@ export interface SqlRequest {
 export enum Status {
   Value1 = 1,
   Value2 = 2,
+  Value4 = 4,
+  Value8 = 8,
 }
 
 export interface Tenant {
@@ -156,6 +158,7 @@ export interface UpdateDatabaseServerRequest {
   databaseServerIpAddress: string | null;
   databaseServerHostName: string | null;
   databaseServerFullyQualifiedDomainName: string | null;
+  isLinkedServer?: boolean;
 }
 
 export interface UpdateDatabaseTypeRequest {

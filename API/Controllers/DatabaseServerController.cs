@@ -14,10 +14,10 @@ public class DatabaseServerController(Locator dbLocator) : ControllerBase
     {
         return await dbLocator.AddDatabaseServer(
             request.DatabaseServerName,
+            request.IsLinkedServer,
             request.DatabaseServerIpAddress,
             request.DatabaseServerHostName,
-            request.DatabaseServerFullyQualifiedDomainName,
-            request.IsLinkedServer
+            request.DatabaseServerFullyQualifiedDomainName
         );
     }
 
@@ -32,10 +32,11 @@ public class DatabaseServerController(Locator dbLocator) : ControllerBase
     {
         await dbLocator.UpdateDatabaseServer(
             request.DatabaseServerId,
+            request.DatabaseServerHostName,
             request.DatabaseServerName,
             request.DatabaseServerIpAddress,
-            request.DatabaseServerHostName,
-            request.DatabaseServerFullyQualifiedDomainName
+            request.DatabaseServerFullyQualifiedDomainName,
+            request.IsLinkedServer
         );
     }
 

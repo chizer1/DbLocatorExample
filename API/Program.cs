@@ -1,4 +1,5 @@
 ﻿using DbLocator;
+using Microsoft.Extensions.Caching.Distributed;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +24,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient(provider => new Locator(
     builder.Configuration["DbLocator:ConnectionString"],
-    "LongSecretKey",
-    null
+    "LongSecretKey"
+    //provider.GetRequiredService<IDistributedCache>()
 ));
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
@@ -48,7 +49,6 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseStaticFiles();
 app.MapControllers();
 
 app.Use(
