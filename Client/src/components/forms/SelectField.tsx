@@ -1,5 +1,5 @@
-import React from 'react';
-import { useForm } from './FormContext';
+import React from "react";
+import { useForm } from "./FormContext";
 
 interface Option {
   value: string | number;
@@ -29,18 +29,25 @@ const SelectField: React.FC<SelectFieldProps> = ({
   icon,
   multiple = false,
 }) => {
-  const { values, errors, touched, setFieldValue, setFieldError, setFieldTouched } = useForm();
+  const {
+    values,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldError,
+    setFieldTouched,
+  } = useForm();
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = multiple
-      ? Array.from(e.target.selectedOptions, option => option.value)
+      ? Array.from(e.target.selectedOptions, (option) => option.value)
       : e.target.value;
-    
+
     setFieldValue(name, value);
-    
+
     if (validate) {
       const error = validate(value);
-      setFieldError(name, error || '');
+      setFieldError(name, error || "");
     }
   };
 
@@ -49,7 +56,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   };
 
   const error = touched[name] && errors[name];
-  const value = values[name] || (multiple ? [] : '');
+  const value = values[name] || (multiple ? [] : "");
 
   return (
     <div className="mb-4">
@@ -58,7 +65,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
         {label}
         {required && <span className="text-danger ms-1">*</span>}
       </label>
-      
+
       <div className="position-relative">
         <select
           id={name}
@@ -68,34 +75,26 @@ const SelectField: React.FC<SelectFieldProps> = ({
           onBlur={handleBlur}
           required={required}
           multiple={multiple}
-          className={`form-select ${error ? 'is-invalid' : ''}`}
+          className={`form-select ${error ? "is-invalid" : ""}`}
         >
           {placeholder && (
             <option value="" disabled>
               {placeholder}
             </option>
           )}
-          {options.map(option => (
+          {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
         </select>
-        
-        {error && (
-          <div className="invalid-feedback d-block">
-            {error}
-          </div>
-        )}
-        
-        {helpText && !error && (
-          <div className="form-text">
-            {helpText}
-          </div>
-        )}
+
+        {error && <div className="invalid-feedback d-block">{error}</div>}
+
+        {helpText && !error && <div className="form-text">{helpText}</div>}
       </div>
     </div>
   );
 };
 
-export default SelectField; 
+export default SelectField;

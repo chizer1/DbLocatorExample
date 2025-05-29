@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useForm } from './FormContext';
+import React, { useState } from "react";
+import { useForm } from "./FormContext";
 
 interface Option {
   value: string;
@@ -9,7 +9,7 @@ interface Option {
 interface FormFieldProps {
   name: string;
   label: string;
-  type?: 'text' | 'password' | 'email' | 'number' | 'textarea' | 'select';
+  type?: "text" | "password" | "email" | "number" | "textarea" | "select";
   placeholder?: string;
   required?: boolean;
   validate?: (value: any) => string | undefined;
@@ -22,7 +22,7 @@ interface FormFieldProps {
 const FormField: React.FC<FormFieldProps> = ({
   name,
   label,
-  type = 'text',
+  type = "text",
   placeholder,
   required = false,
   validate,
@@ -31,22 +31,33 @@ const FormField: React.FC<FormFieldProps> = ({
   options,
   multiple,
 }) => {
-  const { values, errors, touched, setFieldValue, setFieldError, setFieldTouched } = useForm();
+  const {
+    values,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldError,
+    setFieldTouched,
+  } = useForm();
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     let value;
-    if (type === 'select' && multiple) {
+    if (type === "select" && multiple) {
       const select = e.target as HTMLSelectElement;
-      value = Array.from(select.selectedOptions, option => option.value);
+      value = Array.from(select.selectedOptions, (option) => option.value);
     } else {
       value = e.target.value;
     }
     setFieldValue(name, value);
-    
+
     if (validate) {
       const error = validate(value);
-      setFieldError(name, error || '');
+      setFieldError(name, error || "");
     }
   };
 
@@ -60,7 +71,7 @@ const FormField: React.FC<FormFieldProps> = ({
   };
 
   const error = touched[name] && errors[name];
-  const value = values[name] || (multiple ? [] : '');
+  const value = values[name] || (multiple ? [] : "");
 
   const inputProps = {
     id: name,
@@ -71,7 +82,7 @@ const FormField: React.FC<FormFieldProps> = ({
     onFocus: handleFocus,
     placeholder,
     required,
-    className: `form-control ${error ? 'is-invalid' : ''} ${isFocused ? 'focus-ring' : ''}`,
+    className: `form-control ${error ? "is-invalid" : ""} ${isFocused ? "focus-ring" : ""}`,
   };
 
   return (
@@ -81,11 +92,11 @@ const FormField: React.FC<FormFieldProps> = ({
         {label}
         {required && <span className="text-danger ms-1">*</span>}
       </label>
-      
+
       <div className="position-relative">
-        {type === 'textarea' ? (
+        {type === "textarea" ? (
           <textarea {...inputProps} rows={4} />
-        ) : type === 'select' ? (
+        ) : type === "select" ? (
           <select {...inputProps} multiple={multiple}>
             {options?.map((option) => (
               <option key={option.value} value={option.value}>
@@ -96,21 +107,13 @@ const FormField: React.FC<FormFieldProps> = ({
         ) : (
           <input {...inputProps} type={type} />
         )}
-        
-        {error && (
-          <div className="invalid-feedback d-block">
-            {error}
-          </div>
-        )}
-        
-        {helpText && !error && (
-          <div className="form-text">
-            {helpText}
-          </div>
-        )}
+
+        {error && <div className="invalid-feedback d-block">{error}</div>}
+
+        {helpText && !error && <div className="form-text">{helpText}</div>}
       </div>
     </div>
   );
 };
 
-export default FormField; 
+export default FormField;

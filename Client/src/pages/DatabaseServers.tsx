@@ -2,13 +2,12 @@ import Table from "react-bootstrap/Table";
 import { Api, DatabaseServer } from "../api";
 import { useState, useEffect } from "react";
 import { Trash, Pencil } from "react-bootstrap-icons";
-import { Button, Modal, Badge } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
-import CheckboxField from "../components/forms/CheckboxField";
-import { FaServer, FaNetworkWired, FaGlobe, FaLink, FaPlus, FaCheck, FaTimes, FaHashtag } from "react-icons/fa";
-import { composeValidators, required, minLength } from "../utils/validation";
+import { FaServer, FaNetworkWired, FaGlobe } from "react-icons/fa";
+import { required } from "../utils/validation";
 
 function DatabaseServers() {
   const [databaseServers, setDatabaseServers] = useState<DatabaseServer[]>([]);
@@ -16,15 +15,9 @@ function DatabaseServers() {
     useState<DatabaseServer | null>(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleCloseAddModal = () => setShowAddModal(false);
-  const handleShowAddModal = () => setShowAddModal(true);
 
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const handleCloseUpdateModal = () => setShowUpdateModal(false);
-  const handleShowUpdateModal = (databaseServer: DatabaseServer) => {
-    setSelectedDatabaseServer(databaseServer);
-    setShowUpdateModal(true);
-  };
 
   useEffect(() => {
     const api = new Api({
@@ -46,7 +39,7 @@ function DatabaseServers() {
       .then((response) => {
         if (response.status === 200) {
           const newDatabaseServers = databaseServers.filter(
-            (databaseServer) => databaseServer.id !== id
+            (databaseServer) => databaseServer.id !== id,
           );
           setDatabaseServers(newDatabaseServers);
           toast.success("Database server deleted successfully!");
@@ -55,10 +48,10 @@ function DatabaseServers() {
       .catch((error: any) => {
         // Extract the error message from the API response
         const apiError = error.response?.data;
-        const errorMessage = typeof apiError === 'string' ? apiError : 
-                           apiError?.message || 
-                           error.message || 
-                           "An unknown error occurred";
+        const errorMessage =
+          typeof apiError === "string"
+            ? apiError
+            : apiError?.message || error.message || "An unknown error occurred";
         toast.error(errorMessage, {
           autoClose: false,
         });
@@ -70,14 +63,18 @@ function DatabaseServers() {
       <div className="mb-4">
         <h1 className="display-4 mb-3">Database Servers</h1>
         <p className="lead text-muted">
-          Manage your database server instances. Add new servers or modify existing ones.
+          Manage your database server instances. DbLocator uses these server
+          configurations to establish secure connections and route database
+          operations. This centralized server management enables consistent
+          access control and connection handling across your entire database
+          infrastructure.
         </p>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           onClick={() => setShowAddModal(true)}
           className="d-flex align-items-center gap-2"
         >
-          <FaPlus /> Add New Server
+          <FaServer /> Add New Server
         </Button>
         <AddDatabaseServerModal
           show={showAddModal}
@@ -88,14 +85,16 @@ function DatabaseServers() {
       </div>
       <div className="card shadow-sm">
         <div className="card-body p-0">
-          <Table 
-            hover 
-            responsive 
+          <Table
+            hover
+            responsive
             className="mb-0"
-            style={{
-              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
-              '--bs-table-hover-color': 'inherit',
-            } as any}
+            style={
+              {
+                "--bs-table-hover-bg": "rgba(0, 123, 255, 0.05)",
+                "--bs-table-hover-color": "inherit",
+              } as any
+            }
           >
             <thead className="bg-light">
               <tr>
@@ -112,25 +111,27 @@ function DatabaseServers() {
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
                       <FaServer className="text-primary" />
-                      <span>{server.name || 'Not specified'}</span>
+                      <span>{server.name || "Not specified"}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
                       <FaNetworkWired className="text-info" />
-                      <span>{server.hostName || 'Not specified'}</span>
+                      <span>{server.hostName || "Not specified"}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
                       <FaNetworkWired className="text-info" />
-                      <span>{server.ipAddress || 'Not specified'}</span>
+                      <span>{server.ipAddress || "Not specified"}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
                       <FaGlobe className="text-success" />
-                      <span>{server.fullyQualifiedDomainName || 'Not specified'}</span>
+                      <span>
+                        {server.fullyQualifiedDomainName || "Not specified"}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-end">
@@ -166,8 +167,8 @@ function DatabaseServers() {
                     <div className="d-flex flex-column align-items-center gap-2">
                       <FaServer size={32} />
                       <p className="mb-0">No database servers found</p>
-                      <Button 
-                        variant="outline-primary" 
+                      <Button
+                        variant="outline-primary"
                         size="sm"
                         onClick={() => setShowAddModal(true)}
                       >
@@ -222,7 +223,8 @@ function AddDatabaseServerModal({
         databaseServerName: values.serverName,
         databaseServerHostName: values.databaseServerHostName,
         databaseServerIpAddress: values.serverIpAddress,
-        databaseServerFullyQualifiedDomainName: values.serverFullyQualifiedDomainName,
+        databaseServerFullyQualifiedDomainName:
+          values.serverFullyQualifiedDomainName,
       });
 
       if (response.status === 200) {
@@ -238,11 +240,19 @@ function AddDatabaseServerModal({
         toast.success("Database server added successfully!");
       }
     } catch (error: unknown) {
-      const apiError = error instanceof Error ? error.response?.data : null;
+      const apiError = (
+        error as {
+          response?: {
+            data:
+              | { errors?: Record<string, string[]>; message?: string }
+              | string;
+          };
+        }
+      )?.response?.data;
       let errorMessage = "An unknown error occurred";
-      
+
       if (apiError) {
-        if (typeof apiError === 'string') {
+        if (typeof apiError === "string") {
           errorMessage = apiError;
         } else if (apiError.errors) {
           // Get the first error message from any field
@@ -252,7 +262,7 @@ function AddDatabaseServerModal({
           errorMessage = apiError.message;
         }
       }
-      
+
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -342,7 +352,8 @@ function UpdateDatabaseServerModal({
         databaseServerName: values.serverName,
         databaseServerHostName: values.databaseServerHostName,
         databaseServerIpAddress: values.serverIpAddress,
-        databaseServerFullyQualifiedDomainName: values.serverFullyQualifiedDomainName,
+        databaseServerFullyQualifiedDomainName:
+          values.serverFullyQualifiedDomainName,
       });
 
       if (response.status === 200) {
@@ -355,7 +366,7 @@ function UpdateDatabaseServerModal({
         };
 
         const newServers = databaseServers.map((s) =>
-          s.id === updatedServer.id ? updatedServer : s
+          s.id === updatedServer.id ? updatedServer : s,
         );
 
         setDatabaseServers(newServers);
@@ -363,11 +374,19 @@ function UpdateDatabaseServerModal({
         toast.success("Database server updated successfully!");
       }
     } catch (error: unknown) {
-      const apiError = error instanceof Error ? error.response?.data : null;
+      const apiError = (
+        error as {
+          response?: {
+            data:
+              | { errors?: Record<string, string[]>; message?: string }
+              | string;
+          };
+        }
+      )?.response?.data;
       let errorMessage = "An unknown error occurred";
-      
+
       if (apiError) {
-        if (typeof apiError === 'string') {
+        if (typeof apiError === "string") {
           errorMessage = apiError;
         } else if (apiError.errors) {
           // Get the first error message from any field
@@ -377,7 +396,7 @@ function UpdateDatabaseServerModal({
           errorMessage = apiError.message;
         }
       }
-      
+
       toast.error(errorMessage, {
         autoClose: false,
       });

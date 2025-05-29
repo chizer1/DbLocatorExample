@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { FormProvider, useForm } from './FormContext';
-import LoadingButton from './LoadingButton';
+import React, { useState } from "react";
+import { FormProvider, useForm } from "./FormContext";
+import LoadingButton from "./LoadingButton";
 
 interface FormProps {
   initialValues: Record<string, any>;
@@ -13,14 +13,14 @@ interface FormProps {
   errorMessage?: string;
 }
 
-const FormContent: React.FC<Omit<FormProps, 'initialValues'>> = ({
+const FormContent: React.FC<Omit<FormProps, "initialValues">> = ({
   onSubmit,
   children,
-  className = '',
-  submitText = 'Submit',
-  loadingText = 'Submitting...',
-  successMessage = 'Form submitted successfully!',
-  errorMessage = 'An error occurred. Please try again.',
+  className = "",
+  submitText = "Submit",
+  loadingText = "Submitting...",
+  successMessage = "Form submitted successfully!",
+  errorMessage = "An error occurred. Please try again.",
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -46,13 +46,13 @@ const FormContent: React.FC<Omit<FormProps, 'initialValues'>> = ({
   return (
     <form className={className} onSubmit={handleSubmit}>
       {children}
-      
+
       {isSuccess && (
         <div className="alert alert-success mt-3" role="alert">
           {successMessage}
         </div>
       )}
-      
+
       {error && (
         <div className="alert alert-danger mt-3" role="alert">
           {error}
@@ -82,4 +82,4 @@ const Form: React.FC<FormProps> = (props) => {
   );
 };
 
-export default Form; 
+export default Form;

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useForm } from './FormContext';
+import React from "react";
+import { useForm } from "./FormContext";
 
 interface Option {
   value: string | number;
@@ -27,15 +27,22 @@ const RadioField: React.FC<RadioFieldProps> = ({
   icon,
   inline = false,
 }) => {
-  const { values, errors, touched, setFieldValue, setFieldError, setFieldTouched } = useForm();
+  const {
+    values,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldError,
+    setFieldTouched,
+  } = useForm();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setFieldValue(name, value);
-    
+
     if (validate) {
       const error = validate(value);
-      setFieldError(name, error || '');
+      setFieldError(name, error || "");
     }
   };
 
@@ -44,7 +51,7 @@ const RadioField: React.FC<RadioFieldProps> = ({
   };
 
   const error = touched[name] && errors[name];
-  const value = values[name] || '';
+  const value = values[name] || "";
 
   return (
     <div className="mb-4">
@@ -53,9 +60,9 @@ const RadioField: React.FC<RadioFieldProps> = ({
         {label}
         {required && <span className="text-danger ms-1">*</span>}
       </label>
-      
-      <div className={`${inline ? 'd-flex gap-3' : ''}`}>
-        {options.map(option => (
+
+      <div className={`${inline ? "d-flex gap-3" : ""}`}>
+        {options.map((option) => (
           <div key={option.value} className="form-check">
             <input
               type="radio"
@@ -66,7 +73,7 @@ const RadioField: React.FC<RadioFieldProps> = ({
               onChange={handleChange}
               onBlur={handleBlur}
               required={required}
-              className={`form-check-input ${error ? 'is-invalid' : ''}`}
+              className={`form-check-input ${error ? "is-invalid" : ""}`}
             />
             <label
               htmlFor={`${name}-${option.value}`}
@@ -77,20 +84,12 @@ const RadioField: React.FC<RadioFieldProps> = ({
           </div>
         ))}
       </div>
-      
-      {error && (
-        <div className="invalid-feedback d-block mt-1">
-          {error}
-        </div>
-      )}
-      
-      {helpText && !error && (
-        <div className="form-text mt-1">
-          {helpText}
-        </div>
-      )}
+
+      {error && <div className="invalid-feedback d-block mt-1">{error}</div>}
+
+      {helpText && !error && <div className="form-text mt-1">{helpText}</div>}
     </div>
   );
 };
 
-export default RadioField; 
+export default RadioField;

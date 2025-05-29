@@ -1,5 +1,5 @@
-import React from 'react';
-import { useForm } from './FormContext';
+import React from "react";
+import { useForm } from "./FormContext";
 
 interface CheckboxFieldProps {
   name: string;
@@ -18,15 +18,22 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
   helpText,
   icon,
 }) => {
-  const { values, errors, touched, setFieldValue, setFieldError, setFieldTouched } = useForm();
+  const {
+    values,
+    errors,
+    touched,
+    setFieldValue,
+    setFieldError,
+    setFieldTouched,
+  } = useForm();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.checked;
     setFieldValue(name, value);
-    
+
     if (validate) {
       const error = validate(value);
-      setFieldError(name, error || '');
+      setFieldError(name, error || "");
     }
   };
 
@@ -48,28 +55,23 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({
           onChange={handleChange}
           onBlur={handleBlur}
           required={required}
-          className={`form-check-input ${error ? 'is-invalid' : ''}`}
+          className={`form-check-input ${error ? "is-invalid" : ""}`}
         />
-        <label htmlFor={name} className="form-check-label d-flex align-items-center">
+        <label
+          htmlFor={name}
+          className="form-check-label d-flex align-items-center"
+        >
           {icon && <span className="me-2">{icon}</span>}
           {label}
           {required && <span className="text-danger ms-1">*</span>}
         </label>
       </div>
-      
-      {error && (
-        <div className="invalid-feedback d-block mt-1">
-          {error}
-        </div>
-      )}
-      
-      {helpText && !error && (
-        <div className="form-text mt-1">
-          {helpText}
-        </div>
-      )}
+
+      {error && <div className="invalid-feedback d-block mt-1">{error}</div>}
+
+      {helpText && !error && <div className="form-text mt-1">{helpText}</div>}
     </div>
   );
 };
 
-export default CheckboxField; 
+export default CheckboxField;

@@ -2,16 +2,17 @@ import { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
 import { Api, DatabaseType } from "../api";
 import { Trash, Pencil } from "react-bootstrap-icons";
-import { Button, Modal, Badge } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
-import { FaDatabase, FaCode, FaPlus, FaCheck, FaTimes } from "react-icons/fa";
+import { FaCode } from "react-icons/fa";
 import { composeValidators, required, minLength } from "../utils/validation";
 
 function DatabaseTypes() {
   const [databaseTypes, setDatabaseTypes] = useState<DatabaseType[]>([]);
-  const [selectedDatabaseType, setSelectedDatabaseType] = useState<DatabaseType | null>(null);
+  const [selectedDatabaseType, setSelectedDatabaseType] =
+    useState<DatabaseType | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
@@ -35,7 +36,7 @@ function DatabaseTypes() {
       .then((response) => {
         if (response.status === 200) {
           const newDatabaseTypes = databaseTypes.filter(
-            (databaseType) => databaseType.id !== id
+            (databaseType) => databaseType.id !== id,
           );
           setDatabaseTypes(newDatabaseTypes);
           toast.success("Database type deleted successfully!");
@@ -43,10 +44,10 @@ function DatabaseTypes() {
       })
       .catch((error: any) => {
         const apiError = error.response?.data;
-        const errorMessage = typeof apiError === 'string' ? apiError : 
-                           apiError?.message || 
-                           error.message || 
-                           "An unknown error occurred";
+        const errorMessage =
+          typeof apiError === "string"
+            ? apiError
+            : apiError?.message || error.message || "An unknown error occurred";
         toast.error(errorMessage, {
           autoClose: false,
         });
@@ -58,14 +59,21 @@ function DatabaseTypes() {
       <div className="mb-4">
         <h1 className="display-4 mb-3">Database Types</h1>
         <p className="lead text-muted">
-          Manage your database types. Add new types or modify existing ones.
+          Define and manage different types of databases in your system.
+          DbLocator uses these types to apply appropriate connection handling
+          and security policies. This allows you to support multiple database
+          technologies while maintaining consistent access control and
+          management practices. For example, you might create types like
+          "Customer", "Order", "Inventory", or "Billing" to represent different
+          parts of your system, each with its own database and specific access
+          requirements.
         </p>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           onClick={() => setShowAddModal(true)}
           className="d-flex align-items-center gap-2"
         >
-          <FaPlus /> Add New Type
+          <FaCode /> Add New Type
         </Button>
         <AddDatabaseTypeModal
           show={showAddModal}
@@ -76,14 +84,16 @@ function DatabaseTypes() {
       </div>
       <div className="card shadow-sm">
         <div className="card-body p-0">
-          <Table 
-            hover 
-            responsive 
+          <Table
+            hover
+            responsive
             className="mb-0"
-            style={{
-              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
-              '--bs-table-hover-color': 'inherit',
-            } as any}
+            style={
+              {
+                "--bs-table-hover-bg": "rgba(0, 123, 255, 0.05)",
+                "--bs-table-hover-color": "inherit",
+              } as any
+            }
           >
             <thead className="bg-light">
               <tr>
@@ -96,7 +106,7 @@ function DatabaseTypes() {
                 <tr key={type.id} className="align-middle">
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
-                      <FaDatabase className="text-primary" />
+                      <FaCode className="text-primary" />
                       <span>{type.name}</span>
                     </div>
                   </td>
@@ -131,10 +141,10 @@ function DatabaseTypes() {
                 <tr>
                   <td colSpan={2} className="text-center py-5 text-muted">
                     <div className="d-flex flex-column align-items-center gap-2">
-                      <FaDatabase size={32} />
+                      <FaCode size={32} />
                       <p className="mb-0">No database types found</p>
-                      <Button 
-                        variant="outline-primary" 
+                      <Button
+                        variant="outline-primary"
                         size="sm"
                         onClick={() => setShowAddModal(true)}
                       >
@@ -197,7 +207,8 @@ function AddDatabaseTypeModal({
         toast.success("Database type added successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -221,7 +232,7 @@ function AddDatabaseTypeModal({
             name="name"
             label="Database Type Name"
             required
-            icon={<FaDatabase />}
+            icon={<FaCode />}
             validate={composeValidators(required, minLength(2))}
             helpText="Enter a unique name for the database type"
           />
@@ -268,7 +279,7 @@ function UpdateDatabaseTypeModal({
         };
 
         const newTypes = databaseTypes.map((t) =>
-          t.id === updatedType.id ? updatedType : t
+          t.id === updatedType.id ? updatedType : t,
         );
 
         setDatabaseTypes(newTypes);
@@ -276,7 +287,8 @@ function UpdateDatabaseTypeModal({
         toast.success("Database type updated successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -300,7 +312,7 @@ function UpdateDatabaseTypeModal({
             name="name"
             label="Database Type Name"
             required
-            icon={<FaDatabase />}
+            icon={<FaCode />}
             validate={composeValidators(required, minLength(2))}
             helpText="Enter a unique name for the database type"
           />

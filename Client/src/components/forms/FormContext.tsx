@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 interface FormContextType {
   values: Record<string, any>;
@@ -7,7 +7,9 @@ interface FormContextType {
   setFieldValue: (field: string, value: any) => void;
   setFieldError: (field: string, error: string) => void;
   setFieldTouched: (field: string, touched: boolean) => void;
-  handleSubmit: (onSubmit: (values: Record<string, any>) => void) => (e: React.FormEvent) => void;
+  handleSubmit: (
+    onSubmit: (values: Record<string, any>) => void,
+  ) => (e: React.FormEvent) => void;
   resetForm: () => void;
 }
 
@@ -18,29 +20,35 @@ interface FormProviderProps {
   children: React.ReactNode;
 }
 
-export const FormProvider: React.FC<FormProviderProps> = ({ initialValues, children }) => {
+export const FormProvider: React.FC<FormProviderProps> = ({
+  initialValues,
+  children,
+}) => {
   const [values, setValues] = useState<Record<string, any>>(initialValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const setFieldValue = useCallback((field: string, value: any) => {
-    setValues(prev => ({ ...prev, [field]: value }));
+    setValues((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const setFieldError = useCallback((field: string, error: string) => {
-    setErrors(prev => ({ ...prev, [field]: error }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
   }, []);
 
   const setFieldTouched = useCallback((field: string, touched: boolean) => {
-    setTouched(prev => ({ ...prev, [field]: touched }));
+    setTouched((prev) => ({ ...prev, [field]: touched }));
   }, []);
 
-  const handleSubmit = useCallback((onSubmit: (values: Record<string, any>) => void) => {
-    return (e: React.FormEvent) => {
-      e.preventDefault();
-      onSubmit(values);
-    };
-  }, [values]);
+  const handleSubmit = useCallback(
+    (onSubmit: (values: Record<string, any>) => void) => {
+      return (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(values);
+      };
+    },
+    [values],
+  );
 
   const resetForm = useCallback(() => {
     setValues(initialValues);
@@ -65,7 +73,7 @@ export const FormProvider: React.FC<FormProviderProps> = ({ initialValues, child
 export const useForm = () => {
   const context = useContext(FormContext);
   if (!context) {
-    throw new Error('useForm must be used within a FormProvider');
+    throw new Error("useForm must be used within a FormProvider");
   }
   return context;
-}; 
+};

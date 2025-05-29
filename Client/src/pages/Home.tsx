@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Api, DatabaseRole, DatabaseType, Tenant } from "../api";
-import { Button, Card, Form, Badge } from "react-bootstrap";
-import { FaDatabase, FaUser, FaCode, FaPlay, FaServer, FaShieldAlt, FaNetworkWired } from "react-icons/fa";
+import { Button, Card, Form } from "react-bootstrap";
+import {
+  FaDatabase,
+  FaUser,
+  FaCode,
+  FaPlay,
+  FaShieldAlt,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 
 // Map of role numbers to their display names
@@ -14,19 +20,25 @@ const DATABASE_ROLES: Record<DatabaseRole, string> = {
   [DatabaseRole.Value6]: "DataWriter",
   [DatabaseRole.Value7]: "DDLAdmin",
   [DatabaseRole.Value8]: "DenyDataReader",
-  [DatabaseRole.Value9]: "DenyDataWriter"
+  [DatabaseRole.Value9]: "DenyDataWriter",
 };
 
 function Home() {
   const [results, setResults] = useState<any[]>([]);
   const [databaseTypes, setDatabaseTypes] = useState<DatabaseType[]>([]);
-  const [selectedDatabaseTypeId, setSelectedDatabaseTypeId] = useState<number>(0);
+  const [selectedDatabaseTypeId, setSelectedDatabaseTypeId] =
+    useState<number>(0);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [selectedTenantId, setSelectedTenantId] = useState<number>(0);
-  const [databaseRoles] = useState<DatabaseRole[]>(Object.values(DatabaseRole).filter((value) => typeof value === "number") as DatabaseRole[]);
-  const [selectedDatabaseRoleIds, setSelectedDatabaseRoleIds] = useState<DatabaseRole[]>([]);
+  const [databaseRoles] = useState<DatabaseRole[]>(
+    Object.values(DatabaseRole).filter(
+      (value) => typeof value === "number",
+    ) as DatabaseRole[],
+  );
+  const [selectedDatabaseRoleIds, setSelectedDatabaseRoleIds] = useState<
+    DatabaseRole[]
+  >([]);
   const [sql, setSql] = useState<string>("");
-  const [isQuery, setIsQuery] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -36,21 +48,33 @@ function Home() {
 
     Promise.all([
       api.databaseType.getDatabaseTypesList(),
-      api.tenant.getTenantsList()
-    ]).then(([databaseTypesResponse, tenantsResponse]) => {
-      setDatabaseTypes(databaseTypesResponse.data);
-      setTenants(tenantsResponse.data);
-    }).catch(error => {
-      toast.error("Failed to load initial data: " + error.message);
-    });
+      api.tenant.getTenantsList(),
+    ])
+      .then(([databaseTypesResponse, tenantsResponse]) => {
+        setDatabaseTypes(databaseTypesResponse.data);
+        setTenants(tenantsResponse.data);
+      })
+      .catch((error) => {
+        toast.error("Failed to load initial data: " + error.message);
+      });
   }, []);
+
+  function isQueryStatement(sql: string): boolean {
+    const trimmedSql = sql.trim().toLowerCase();
+    return (
+      trimmedSql.startsWith("select") ||
+      trimmedSql.startsWith("with") ||
+      trimmedSql.startsWith("show") ||
+      trimmedSql.startsWith("describe") ||
+      trimmedSql.startsWith("explain")
+    );
+  }
 
   function executeQueryOrCommand(
     tenantId: number,
     databaseTypeId: number,
     databaseRoles: DatabaseRole[],
     sql: string,
-    isQuery: boolean
   ) {
     if (!sql.trim()) {
       setResults([{ error: "Please enter SQL query or command" }]);
@@ -77,6 +101,7 @@ function Home() {
       baseURL: "http://localhost:5022",
     });
 
+    const isQuery = isQueryStatement(sql);
     const request = isQuery
       ? api.sql.queryCreate({
           tenantId: tenantId,
@@ -93,7 +118,9 @@ function Home() {
 
     request
       .then((response) => {
-        if (response && response.data !== undefined) {
+        if (!isQuery) {
+          setResults([{ message: "Command successful!" }]);
+        } else if (response && response.data !== undefined) {
           setResults(response.data);
         } else {
           setResults([{ message: "Query executed with no results" }]);
@@ -101,10 +128,10 @@ function Home() {
       })
       .catch((error) => {
         const apiError = error.response?.data;
-        const errorMessage = typeof apiError === 'string' ? apiError : 
-                           apiError?.message || 
-                           error.message || 
-                           "An unknown error occurred";
+        const errorMessage =
+          typeof apiError === "string"
+            ? apiError
+            : apiError?.message || error.message || "An unknown error occurred";
         setResults([{ error: errorMessage }]);
       })
       .finally(() => {
@@ -115,10 +142,13 @@ function Home() {
   return (
     <>
       <div className="mb-4">
-        <h1 className="display-4 mb-3">SQL Query Runner</h1>
+        <h1 className="display-4 mb-3">SQL Runner</h1>
         <p className="lead text-muted">
-          Execute SQL queries or commands against your databases. Test table creation as a dbowner, 
-          run queries as a dbreader, or perform any other database operations.
+          Simplifies multi-tenant database access by automatically handling
+          connection management and role-based permissions. This page
+          demonstrates how you can execute SQL statements with different roles
+          across various tenants and database types, all without managing
+          complex connection strings or security configurations.
         </p>
       </div>
 
@@ -134,7 +164,9 @@ function Home() {
                   </Form.Label>
                   <Form.Select
                     value={selectedTenantId}
-                    onChange={(e) => setSelectedTenantId(parseInt(e.target.value))}
+                    onChange={(e) =>
+                      setSelectedTenantId(parseInt(e.target.value))
+                    }
                   >
                     <option value={0}>Select a tenant</option>
                     {tenants.map((tenant) => (
@@ -151,7 +183,9 @@ function Home() {
                   </Form.Label>
                   <Form.Select
                     value={selectedDatabaseTypeId}
-                    onChange={(e) => setSelectedDatabaseTypeId(parseInt(e.target.value))}
+                    onChange={(e) =>
+                      setSelectedDatabaseTypeId(parseInt(e.target.value))
+                    }
                   >
                     <option value={0}>Select a database type</option>
                     {databaseTypes.map((databaseType) => (
@@ -168,10 +202,13 @@ function Home() {
                   </Form.Label>
                   <Form.Select
                     multiple
-                    value={selectedDatabaseRoleIds}
+                    value={selectedDatabaseRoleIds.map((role) =>
+                      role.toString(),
+                    )}
                     onChange={(e) => {
-                      const selectedOptions = Array.from(e.target.selectedOptions, (option) => 
-                        parseInt(option.value) as DatabaseRole
+                      const selectedOptions = Array.from(
+                        e.target.selectedOptions,
+                        (option) => parseInt(option.value) as DatabaseRole,
                       );
                       setSelectedDatabaseRoleIds(selectedOptions);
                     }}
@@ -200,16 +237,6 @@ function Home() {
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-4">
-                  <Form.Check
-                    type="checkbox"
-                    id="isQueryCheck"
-                    label="Is Query"
-                    checked={isQuery}
-                    onChange={(e) => setIsQuery(e.target.checked)}
-                  />
-                </Form.Group>
-
                 <Button
                   variant="primary"
                   className="w-100 d-flex align-items-center justify-content-center gap-2"
@@ -219,7 +246,6 @@ function Home() {
                       selectedDatabaseTypeId,
                       selectedDatabaseRoleIds,
                       sql,
-                      isQuery
                     );
                   }}
                   disabled={isLoading}
@@ -237,7 +263,10 @@ function Home() {
               <h5 className="card-title mb-4">Results</h5>
               {results.length > 0 ? (
                 <div className="bg-light p-3 rounded">
-                  <pre className="mb-0" style={{ maxHeight: "500px", overflow: "auto" }}>
+                  <pre
+                    className="mb-0"
+                    style={{ maxHeight: "500px", overflow: "auto" }}
+                  >
                     {JSON.stringify(results, null, 2)}
                   </pre>
                 </div>

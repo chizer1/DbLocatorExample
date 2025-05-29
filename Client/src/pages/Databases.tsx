@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
 import Table from "react-bootstrap/Table";
-import { Api, Database, DatabaseType, DatabaseServer, Status } from "../api";
+import { Api, Database, DatabaseType, DatabaseServer } from "../api";
 import { Trash, Pencil } from "react-bootstrap-icons";
 import { Button, Modal, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
-import { FaDatabase, FaServer, FaPlus, FaCheck, FaTimes } from "react-icons/fa";
+import { FaDatabase, FaServer, FaCheck, FaCode } from "react-icons/fa";
 import { composeValidators, required, minLength } from "../utils/validation";
 
 function Databases() {
   const [databases, setDatabases] = useState<Database[]>([]);
   const [databaseTypes, setDatabaseTypes] = useState<DatabaseType[]>([]);
   const [databaseServers, setDatabaseServers] = useState<DatabaseServer[]>([]);
-  const [selectedDatabase, setSelectedDatabase] = useState<Database | null>(null);
+  const [selectedDatabase, setSelectedDatabase] = useState<Database | null>(
+    null,
+  );
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
@@ -25,7 +27,7 @@ function Databases() {
     Promise.all([
       api.database.getDatabasesList(),
       api.databaseType.getDatabaseTypesList(),
-      api.databaseServer.getDatabaseServersList()
+      api.databaseServer.getDatabaseServersList(),
     ]).then(([databasesResponse, typesResponse, serversResponse]) => {
       setDatabases(databasesResponse.data);
       setDatabaseTypes(typesResponse.data);
@@ -43,7 +45,7 @@ function Databases() {
       .then((response) => {
         if (response.status === 200) {
           const newDatabases = databases.filter(
-            (database) => database.id !== id
+            (database) => database.id !== id,
           );
           setDatabases(newDatabases);
           toast.success("Database deleted successfully!");
@@ -52,10 +54,10 @@ function Databases() {
       .catch((error: any) => {
         // Extract the error message from the API response
         const apiError = error.response?.data;
-        const errorMessage = typeof apiError === 'string' ? apiError : 
-                           apiError?.message || 
-                           error.message || 
-                           "An unknown error occurred";
+        const errorMessage =
+          typeof apiError === "string"
+            ? apiError
+            : apiError?.message || error.message || "An unknown error occurred";
         toast.error(errorMessage, {
           autoClose: false,
         });
@@ -67,14 +69,16 @@ function Databases() {
       <div className="mb-4">
         <h1 className="display-4 mb-3">Databases</h1>
         <p className="lead text-muted">
-          Manage your databases. Add new databases or modify existing ones.
+          Configure and manage your database instances. DbLocator uses this
+          information to establish connections and enforce access control. Each
+          database is associated with a specific server and database type.
         </p>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           onClick={() => setShowAddModal(true)}
           className="d-flex align-items-center gap-2"
         >
-          <FaPlus /> Add New Database
+          <FaDatabase /> Add New Database
         </Button>
         <AddDatabaseModal
           show={showAddModal}
@@ -87,14 +91,16 @@ function Databases() {
       </div>
       <div className="card shadow-sm">
         <div className="card-body p-0">
-          <Table 
-            hover 
-            responsive 
+          <Table
+            hover
+            responsive
             className="mb-0"
-            style={{
-              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
-              '--bs-table-hover-color': 'inherit',
-            } as any}
+            style={
+              {
+                "--bs-table-hover-bg": "rgba(0, 123, 255, 0.05)",
+                "--bs-table-hover-color": "inherit",
+              } as any
+            }
           >
             <thead className="bg-light">
               <tr>
@@ -116,18 +122,21 @@ function Databases() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
-                      <FaDatabase className="text-info" />
-                      <span>{database.type?.name || 'Not specified'}</span>
+                      <FaCode className="text-info" />
+                      <span>{database.type?.name || "Not specified"}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
                       <FaServer className="text-success" />
-                      <span>{database.server?.name || 'Not specified'}</span>
+                      <span>{database.server?.name || "Not specified"}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge bg={database.status === 1 ? "success" : "warning"} className="px-3 py-2">
+                    <Badge
+                      bg={database.status === 1 ? "success" : "warning"}
+                      className="px-3 py-2"
+                    >
                       {database.status === 1 ? "Active" : "Inactive"}
                     </Badge>
                   </td>
@@ -164,8 +173,8 @@ function Databases() {
                     <div className="d-flex flex-column align-items-center gap-2">
                       <FaDatabase size={32} />
                       <p className="mb-0">No databases found</p>
-                      <Button 
-                        variant="outline-primary" 
+                      <Button
+                        variant="outline-primary"
                         size="sm"
                         onClick={() => setShowAddModal(true)}
                       >
@@ -224,9 +233,10 @@ function AddDatabaseModal({
     }
 
     // If there's only one server, use its ID regardless of the form value
-    const serverId = databaseServers.length === 1 
-      ? databaseServers[0].id 
-      : parseInt(values.serverId);
+    const serverId =
+      databaseServers.length === 1
+        ? databaseServers[0].id
+        : parseInt(values.serverId);
 
     if (!serverId) {
       toast.error("Please select a database server");
@@ -249,16 +259,17 @@ function AddDatabaseModal({
         const newDatabase: Database = {
           id: response.data!,
           name: values.name.trim(),
-          type: databaseTypes.find(t => t.id === parseInt(values.typeId))!,
-          server: databaseServers.find(s => s.id === serverId)!,
-          status: parseInt(values.status)
+          type: databaseTypes.find((t) => t.id === parseInt(values.typeId))!,
+          server: databaseServers.find((s) => s.id === serverId)!,
+          status: parseInt(values.status),
         };
         setDatabases([...databases, newDatabase]);
         handleClose();
         toast.success("Database added successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -272,7 +283,7 @@ function AddDatabaseModal({
       </Modal.Header>
       <Modal.Body>
         <Form
-          key={show ? 'new' : 'reset'}
+          key={show ? "new" : "reset"}
           initialValues={initialValues}
           onSubmit={handleSubmit}
           submitText="Add Database"
@@ -293,12 +304,12 @@ function AddDatabaseModal({
             label="Database Type"
             type="select"
             required
-            icon={<FaDatabase />}
+            icon={<FaCode />}
             validate={required}
             helpText="Select the type of database"
-            options={databaseTypes.map(type => ({
-              value: type.id?.toString() || '',
-              label: type.name || ''
+            options={databaseTypes.map((type) => ({
+              value: type.id?.toString() || "",
+              label: type.name || "",
             }))}
           />
 
@@ -309,10 +320,14 @@ function AddDatabaseModal({
             required={databaseServers.length > 1}
             icon={<FaServer />}
             validate={databaseServers.length > 1 ? required : undefined}
-            helpText={databaseServers.length === 1 ? "Only one server available" : "Select the server for this database"}
-            options={databaseServers.map(server => ({
-              value: server.id?.toString() || '',
-              label: server.name || ''
+            helpText={
+              databaseServers.length === 1
+                ? "Only one server available"
+                : "Select the server for this database"
+            }
+            options={databaseServers.map((server) => ({
+              value: server.id?.toString() || "",
+              label: server.name || "",
             }))}
           />
 
@@ -326,7 +341,7 @@ function AddDatabaseModal({
             helpText="Select the status of the database"
             options={[
               { value: "1", label: "Active" },
-              { value: "2", label: "Inactive" }
+              { value: "2", label: "Inactive" },
             ]}
           />
         </Form>
@@ -379,13 +394,15 @@ function UpdateDatabaseModal({
         const updatedDatabase: Database = {
           id: database.id,
           name: values.name,
-          type: databaseTypes.find(t => t.id === parseInt(values.typeId))!,
-          server: databaseServers.find(s => s.id === parseInt(values.serverId))!,
+          type: databaseTypes.find((t) => t.id === parseInt(values.typeId))!,
+          server: databaseServers.find(
+            (s) => s.id === parseInt(values.serverId),
+          )!,
           status: parseInt(values.status),
         };
 
         const newDatabases = databases.map((d) =>
-          d.id === updatedDatabase.id ? updatedDatabase : d
+          d.id === updatedDatabase.id ? updatedDatabase : d,
         );
 
         setDatabases(newDatabases);
@@ -393,7 +410,8 @@ function UpdateDatabaseModal({
         toast.success("Database updated successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -427,12 +445,12 @@ function UpdateDatabaseModal({
             label="Database Type"
             type="select"
             required
-            icon={<FaDatabase />}
+            icon={<FaCode />}
             validate={required}
             helpText="Select the type of database"
-            options={databaseTypes.map(type => ({
-              value: type.id?.toString() || '',
-              label: type.name || ''
+            options={databaseTypes.map((type) => ({
+              value: type.id?.toString() || "",
+              label: type.name || "",
             }))}
           />
 
@@ -444,9 +462,9 @@ function UpdateDatabaseModal({
             icon={<FaServer />}
             validate={required}
             helpText="Select the server for this database"
-            options={databaseServers.map(server => ({
-              value: server.id?.toString() || '',
-              label: server.name || ''
+            options={databaseServers.map((server) => ({
+              value: server.id?.toString() || "",
+              label: server.name || "",
             }))}
           />
 
@@ -460,7 +478,7 @@ function UpdateDatabaseModal({
             helpText="Select the status of the database"
             options={[
               { value: "1", label: "Active" },
-              { value: "2", label: "Inactive" }
+              { value: "2", label: "Inactive" },
             ]}
           />
         </Form>

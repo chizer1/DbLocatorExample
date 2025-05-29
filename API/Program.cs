@@ -24,8 +24,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddTransient(provider => new Locator(
     builder.Configuration["DbLocator:ConnectionString"],
-    "LongSecretKey"
-    //provider.GetRequiredService<IDistributedCache>()
+    "LongSecretKey",
+    provider.GetRequiredService<IDistributedCache>()
 ));
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";

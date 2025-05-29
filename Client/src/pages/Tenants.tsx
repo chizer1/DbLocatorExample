@@ -6,7 +6,7 @@ import { Button, Modal, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Form from "../components/forms/Form";
 import FormField from "../components/forms/FormField";
-import { FaBuilding, FaPlus, FaHashtag } from "react-icons/fa";
+import { FaBuilding, FaHashtag } from "react-icons/fa";
 import { composeValidators, required, minLength } from "../utils/validation";
 
 function Tenants() {
@@ -34,19 +34,17 @@ function Tenants() {
       .deleteTenantDelete({ tenantId: id })
       .then((response) => {
         if (response.status === 200) {
-          const newTenants = tenants.filter(
-            (tenant) => tenant.id !== id
-          );
+          const newTenants = tenants.filter((tenant) => tenant.id !== id);
           setTenants(newTenants);
           toast.success("Tenant deleted successfully!");
         }
       })
       .catch((error: any) => {
         const apiError = error.response?.data;
-        const errorMessage = typeof apiError === 'string' ? apiError : 
-                           apiError?.message || 
-                           error.message || 
-                           "An unknown error occurred";
+        const errorMessage =
+          typeof apiError === "string"
+            ? apiError
+            : apiError?.message || error.message || "An unknown error occurred";
         toast.error(errorMessage, {
           autoClose: false,
         });
@@ -58,14 +56,21 @@ function Tenants() {
       <div className="mb-4">
         <h1 className="display-4 mb-3">Tenants</h1>
         <p className="lead text-muted">
-          Manage your tenants. Add new tenants or modify existing ones.
+          Manage your organization's tenants. DbLocator uses tenants to
+          implement multi-tenancy, allowing you to separate and secure data for
+          different organizations or departments. Each tenant can be connected
+          to specific databases, ensuring proper data isolation and access
+          control across your database infrastructure. For example, you might
+          create tenants for different departments (like "HR", "Finance",
+          "Sales") or different companies in a multi-company setup, each with
+          their own isolated database access.
         </p>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           onClick={() => setShowAddModal(true)}
           className="d-flex align-items-center gap-2"
         >
-          <FaPlus /> Add New Tenant
+          <FaBuilding /> Add New Tenant
         </Button>
         <AddTenantModal
           show={showAddModal}
@@ -76,14 +81,16 @@ function Tenants() {
       </div>
       <div className="card shadow-sm">
         <div className="card-body p-0">
-          <Table 
-            hover 
-            responsive 
+          <Table
+            hover
+            responsive
             className="mb-0"
-            style={{
-              '--bs-table-hover-bg': 'rgba(0, 123, 255, 0.05)',
-              '--bs-table-hover-color': 'inherit',
-            } as any}
+            style={
+              {
+                "--bs-table-hover-bg": "rgba(0, 123, 255, 0.05)",
+                "--bs-table-hover-color": "inherit",
+              } as any
+            }
           >
             <thead className="bg-light">
               <tr>
@@ -105,11 +112,14 @@ function Tenants() {
                   <td className="px-4 py-3">
                     <div className="d-flex align-items-center gap-2">
                       <FaHashtag className="text-info" />
-                      <span>{tenant.code || 'Not specified'}</span>
+                      <span>{tenant.code || "Not specified"}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge bg={tenant.status === 1 ? "success" : "warning"} className="px-3 py-2">
+                    <Badge
+                      bg={tenant.status === 1 ? "success" : "warning"}
+                      className="px-3 py-2"
+                    >
                       {tenant.status === 1 ? "Active" : "Inactive"}
                     </Badge>
                   </td>
@@ -142,12 +152,12 @@ function Tenants() {
               ))}
               {tenants.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="text-center py-5 text-muted">
+                  <td colSpan={3} className="text-center py-5 text-muted">
                     <div className="d-flex flex-column align-items-center gap-2">
                       <FaBuilding size={32} />
                       <p className="mb-0">No tenants found</p>
-                      <Button 
-                        variant="outline-primary" 
+                      <Button
+                        variant="outline-primary"
                         size="sm"
                         onClick={() => setShowAddModal(true)}
                       >
@@ -216,7 +226,8 @@ function AddTenantModal({
         toast.success("Tenant added successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -259,7 +270,7 @@ function AddTenantModal({
             required
             options={[
               { value: "1", label: "Active" },
-              { value: "2", label: "Inactive" }
+              { value: "2", label: "Inactive" },
             ]}
             helpText="Select the tenant's status"
           />
@@ -312,7 +323,7 @@ function UpdateTenantModal({
         };
 
         const newTenants = tenants.map((t) =>
-          t.id === updatedTenant.id ? updatedTenant : t
+          t.id === updatedTenant.id ? updatedTenant : t,
         );
 
         setTenants(newTenants);
@@ -320,7 +331,8 @@ function UpdateTenantModal({
         toast.success("Tenant updated successfully!");
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,
       });
@@ -363,7 +375,7 @@ function UpdateTenantModal({
             required
             options={[
               { value: "1", label: "Active" },
-              { value: "2", label: "Inactive" }
+              { value: "2", label: "Inactive" },
             ]}
             helpText="Select the tenant's status"
           />

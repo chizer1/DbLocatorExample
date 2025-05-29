@@ -1,18 +1,18 @@
-import React from 'react';
+import React from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   text?: string;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  size = 'medium', 
-  text = 'Loading...' 
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = "medium",
+  text = "Loading...",
 }) => {
   const sizeClass = {
-    small: 'spinner-border-sm',
-    medium: '',
-    large: 'spinner-border-lg',
+    small: "spinner-border-sm",
+    medium: "",
+    large: "spinner-border-lg",
   }[size];
 
   return (
@@ -25,4 +25,4 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   );
 };
 
-export default LoadingSpinner; 
+export default LoadingSpinner;

@@ -1,39 +1,39 @@
-import { RouteObject } from 'react-router-dom';
-import Home from './pages/Home';
-import Connections from './pages/Connections';
-import DatabaseUsers from './pages/DatabaseUsers';
-import Databases from './pages/Databases';
-import DatabaseServers from './pages/DatabaseServers';
-import DatabaseTypes from './pages/DatabaseTypes';
-import Tenants from './pages/Tenants';
+import { RouteObject } from "react-router-dom";
+import Home from "./pages/Home";
+import Connections from "./pages/Connections";
+import DatabaseUsers from "./pages/DatabaseUsers";
+import Databases from "./pages/Databases";
+import DatabaseServers from "./pages/DatabaseServers";
+import DatabaseTypes from "./pages/DatabaseTypes";
+import Tenants from "./pages/Tenants";
 
 export const routes: RouteObject[] = [
   {
-    path: '/',
+    path: "/",
     element: <Home />,
   },
   {
-    path: '/connections',
+    path: "/connections",
     element: <Connections />,
   },
   {
-    path: '/databaseUsers',
+    path: "/databaseUsers",
     element: <DatabaseUsers />,
   },
   {
-    path: '/databases',
+    path: "/databases",
     element: <Databases />,
   },
   {
-    path: '/databaseServers',
+    path: "/databaseServers",
     element: <DatabaseServers />,
   },
   {
-    path: '/databaseTypes',
+    path: "/databaseTypes",
     element: <DatabaseTypes />,
   },
   {
-    path: '/tenants',
+    path: "/tenants",
     element: <Tenants />,
   },
-]; 
+];

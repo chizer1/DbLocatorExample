@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -20,7 +20,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    console.error("Uncaught error:", error, errorInfo);
   }
 
   public render() {
@@ -31,7 +31,8 @@ class ErrorBoundary extends Component<Props, State> {
           <p>{this.state.error?.message}</p>
           <hr />
           <p className="mb-0">
-            Please try refreshing the page or contact support if the problem persists.
+            Please try refreshing the page or contact support if the problem
+            persists.
           </p>
         </div>
       );
@@ -41,4 +42,4 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-export default ErrorBoundary; 
+export default ErrorBoundary;

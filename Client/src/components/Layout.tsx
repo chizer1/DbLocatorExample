@@ -1,7 +1,7 @@
-import { Outlet } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import NavigationBar from './navigationBar';
-import 'react-toastify/dist/ReactToastify.css';
+import { Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import NavigationBar from "./navigationBar";
+import "react-toastify/dist/ReactToastify.css";
 
 const Layout = () => {
   return (
@@ -15,4 +15,4 @@ const Layout = () => {
   );
 };
 
-export default Layout; 
+export default Layout;

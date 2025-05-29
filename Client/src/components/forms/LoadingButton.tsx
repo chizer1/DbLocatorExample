@@ -1,31 +1,32 @@
-import React from 'react';
+import React from "react";
 
-interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   loadingText?: string;
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "success" | "danger" | "warning" | "info";
+  size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
 }
 
 const LoadingButton: React.FC<LoadingButtonProps> = ({
   children,
   loading = false,
-  loadingText = 'Loading...',
-  variant = 'primary',
-  size = 'md',
+  loadingText = "Loading...",
+  variant = "primary",
+  size = "md",
   fullWidth = false,
-  className = '',
+  className = "",
   disabled,
   ...props
 }) => {
   const sizeClass = {
-    sm: 'btn-sm',
-    md: '',
-    lg: 'btn-lg',
+    sm: "btn-sm",
+    md: "",
+    lg: "btn-lg",
   }[size];
 
-  const widthClass = fullWidth ? 'w-100' : '';
+  const widthClass = fullWidth ? "w-100" : "";
 
   return (
     <button
@@ -35,7 +36,11 @@ const LoadingButton: React.FC<LoadingButtonProps> = ({
     >
       {loading ? (
         <>
-          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          />
           {loadingText}
         </>
       ) : (
@@ -45,4 +50,4 @@ const LoadingButton: React.FC<LoadingButtonProps> = ({
   );
 };
 
-export default LoadingButton; 
+export default LoadingButton;
