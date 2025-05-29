@@ -56,10 +56,18 @@ function DatabaseUsers() {
             (databaseUser) => databaseUser.id !== id
           );
           setDatabaseUsers(newDatabaseUsers);
+          toast.success("Database user deleted successfully!");
         }
       })
-      .catch((error) => {
-        toast.error(error.toString());
+      .catch((error: any) => {
+        const apiError = error.response?.data;
+        const errorMessage = typeof apiError === 'string' ? apiError : 
+                           apiError?.message || 
+                           error.message || 
+                           "An unknown error occurred";
+        toast.error(errorMessage, {
+          autoClose: false,
+        });
       });
   }
 
@@ -233,37 +241,22 @@ function AddDatabaseUserModal({
     });
 
     try {
-      // First create the user
       const response = await api.databaseUser.addDatabaseUserCreate({
-        username: values.username,
-        userPassword: values.password,
-        databaseIds: values.databaseIds.map((id: string) => parseInt(id)),
+        databaseUserId: parseInt(values.databaseId),
+        databaseUserName: values.username,
+        databaseUserPassword: values.password,
       });
 
       if (response.status === 200) {
-        const userId = response.data!;
-        
-        // Then add roles for the user
-        const rolePromises = values.roles.map((role: string) => 
-          api.databaseUserRole.addDatabaseUserRoleCreate({
-            databaseUserId: userId,
-            databaseRoleId: parseInt(role),
-          })
-        );
-
-        await Promise.all(rolePromises);
-
-        const selectedDatabases = databases.filter(db => 
-          values.databaseIds.includes(db.id?.toString() || "")
-        );
-        const newDatabaseUser: DatabaseUser = {
-          id: userId,
-          name: values.username,
-          databases: selectedDatabases,
-          roles: values.roles.map((role: string) => parseInt(role) as DatabaseRole),
+        const newUser: DatabaseUser = {
+          id: response.data!,
+          databaseId: parseInt(values.databaseId),
+          username: values.username,
+          password: values.password,
         };
-        setDatabaseUsers([...databaseUsers, newDatabaseUser]);
+        setDatabaseUsers([...databaseUsers, newUser]);
         handleClose();
+        toast.success("Database user added successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -366,78 +359,34 @@ function EditDatabaseUserModal({
   }));
 
   const handleSubmit = async (values: any) => {
-    if (!user) return;
-    const api = new Api({ baseURL: "http://localhost:5022" });
+    const api = new Api({
+      baseURL: "http://localhost:5022",
+    });
 
     try {
-      // Update user details
-      await api.databaseUser.updateDatabaseUserUpdate({
+      const response = await api.databaseUser.updateDatabaseUserUpdate({
         databaseUserId: user.id!,
-        userName: values.username,
-        userPassword: values.password || "",
-        databaseIds: values.databaseIds.map((id: string) => parseInt(id)),
+        databaseUserName: values.username,
+        databaseUserPassword: values.password,
       });
 
-      // Update databases
-      const currentDatabaseIds = user.databases?.map(db => db.id?.toString() || "");
-      const newDatabaseIds = values.databaseIds;
-      
-      const databasesToAdd = newDatabaseIds.filter((id: string) => !currentDatabaseIds.includes(id));
-      const databasesToRemove = currentDatabaseIds.filter(id => !newDatabaseIds.includes(id));
+      if (response.status === 200) {
+        const updatedUser: DatabaseUser = {
+          id: user.id,
+          databaseId: user.databaseId,
+          username: values.username,
+          password: values.password,
+        };
 
-      const databasePromises = [
-        ...databasesToAdd.map((id: string) => 
-          api.databaseUserDatabase.addDatabaseUserDatabaseCreate({
-            databaseUserId: user.id!,
-            databaseId: parseInt(id),
-          })
-        ),
-        ...databasesToRemove.map(id => 
-          api.databaseUserDatabase.deleteDatabaseUserDatabaseDelete({
-            databaseUserId: user.id!,
-            databaseId: parseInt(id),
-          })
-        )
-      ];
+        const newUsers = databaseUsers.map((u) =>
+          u.id === updatedUser.id ? updatedUser : u
+        );
 
-      // Update roles
-      const currentRoles = user.roles?.map(role => role.toString()) || [];
-      const newRoles = values.roles;
-      
-      const rolesToAdd = newRoles.filter((role: string) => !currentRoles.includes(role));
-      const rolesToRemove = currentRoles.filter(role => !newRoles.includes(role));
-
-      const rolePromises = [
-        ...rolesToAdd.map((role: string) => 
-          api.databaseUserRole.addDatabaseUserRoleCreate({
-            databaseUserId: user.id!,
-            databaseRoleId: parseInt(role),
-          })
-        ),
-        ...rolesToRemove.map(role => 
-          api.databaseUserRole.deleteDatabaseUserRoleDelete({
-            databaseUserId: user.id!,
-            databaseRoleId: parseInt(role),
-          })
-        )
-      ];
-
-      await Promise.all([...databasePromises, ...rolePromises]);
-
-      // Update local state
-      const updatedUser: DatabaseUser = {
-        ...user,
-        name: values.username,
-        databases: databases.filter(db => values.databaseIds.includes(db.id?.toString() || "")),
-        roles: values.roles.map((role: string) => parseInt(role) as DatabaseRole),
-      };
-
-      const newDatabaseUsers = databaseUsers.map(u => 
-        u.id === user.id ? updatedUser : u
-      );
-      setDatabaseUsers(newDatabaseUsers);
-      handleClose();
-    } catch (error) {
+        setDatabaseUsers(newUsers);
+        handleClose();
+        toast.success("Database user updated successfully!");
+      }
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,

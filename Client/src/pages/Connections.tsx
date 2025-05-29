@@ -46,10 +46,17 @@ function Connections() {
             (connection) => connection.id !== id
           );
           setConnections(newConnections);
+          toast.success("Connection deleted successfully!");
         }
       })
-      .catch((error) => {
-        toast.error(error.toString(), {
+      .catch((error: any) => {
+        // Extract the error message from the API response
+        const apiError = error.response?.data;
+        const errorMessage = typeof apiError === 'string' ? apiError : 
+                           apiError?.message || 
+                           error.message || 
+                           "An unknown error occurred";
+        toast.error(errorMessage, {
           autoClose: false,
         });
       });
@@ -178,21 +185,27 @@ function AddConnectionModal({
 
     try {
       const response = await api.connection.addConnectionCreate({
-        databaseId: Number(values.databaseId),
-        tenantId: Number(values.tenantId),
+        databaseId: parseInt(values.databaseId),
+        tenantId: parseInt(values.tenantId),
       });
 
       if (response.status === 200) {
         const newConnection: Connection = {
           id: response.data!,
-          database: databases.find(d => d.id === Number(values.databaseId))!,
-          tenant: tenants.find(t => t.id === Number(values.tenantId))!,
+          database: databases.find(db => db.id === parseInt(values.databaseId))!,
+          tenant: tenants.find(t => t.id === parseInt(values.tenantId))!,
         };
         setConnections([...connections, newConnection]);
         handleClose();
+        toast.success("Connection added successfully!");
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    } catch (error: any) {
+      // Extract the error message from the API response
+      const apiError = error.response?.data;
+      const errorMessage = typeof apiError === 'string' ? apiError : 
+                         apiError?.message || 
+                         error.message || 
+                         "An unknown error occurred";
       toast.error(errorMessage, {
         autoClose: false,
       });

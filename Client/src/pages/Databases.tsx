@@ -46,10 +46,17 @@ function Databases() {
             (database) => database.id !== id
           );
           setDatabases(newDatabases);
+          toast.success("Database deleted successfully!");
         }
       })
-      .catch((error) => {
-        toast.error(error.toString(), {
+      .catch((error: any) => {
+        // Extract the error message from the API response
+        const apiError = error.response?.data;
+        const errorMessage = typeof apiError === 'string' ? apiError : 
+                           apiError?.message || 
+                           error.message || 
+                           "An unknown error occurred";
+        toast.error(errorMessage, {
           autoClose: false,
         });
       });
@@ -383,6 +390,7 @@ function UpdateDatabaseModal({
 
         setDatabases(newDatabases);
         handleClose();
+        toast.success("Database updated successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";

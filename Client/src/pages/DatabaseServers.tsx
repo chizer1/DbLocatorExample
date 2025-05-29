@@ -49,10 +49,17 @@ function DatabaseServers() {
             (databaseServer) => databaseServer.id !== id
           );
           setDatabaseServers(newDatabaseServers);
+          toast.success("Database server deleted successfully!");
         }
       })
-      .catch((error) => {
-        toast.error(error.toString(), {
+      .catch((error: any) => {
+        // Extract the error message from the API response
+        const apiError = error.response?.data;
+        const errorMessage = typeof apiError === 'string' ? apiError : 
+                           apiError?.message || 
+                           error.message || 
+                           "An unknown error occurred";
+        toast.error(errorMessage, {
           autoClose: false,
         });
       });
@@ -228,6 +235,7 @@ function AddDatabaseServerModal({
         };
         setDatabaseServers([...databaseServers, newServer]);
         handleClose();
+        toast.success("Database server added successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -338,6 +346,7 @@ function UpdateDatabaseServerModal({
 
         setDatabaseServers(newServers);
         handleClose();
+        toast.success("Database server updated successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";

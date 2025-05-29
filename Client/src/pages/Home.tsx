@@ -53,22 +53,22 @@ function Home() {
     isQuery: boolean
   ) {
     if (!sql.trim()) {
-      toast.error("Please enter SQL query or command");
+      setResults([{ error: "Please enter SQL query or command" }]);
       return;
     }
 
     if (!tenantId) {
-      toast.error("Please select a tenant");
+      setResults([{ error: "Please select a tenant" }]);
       return;
     }
 
     if (!databaseTypeId) {
-      toast.error("Please select a database type");
+      setResults([{ error: "Please select a database type" }]);
       return;
     }
 
     if (!databaseRoles || databaseRoles.length === 0) {
-      toast.error("Please select at least one database role");
+      setResults([{ error: "Please select at least one database role" }]);
       return;
     }
 
@@ -95,15 +95,17 @@ function Home() {
       .then((response) => {
         if (response && response.data !== undefined) {
           setResults(response.data);
-          toast.success("Query executed successfully");
         } else {
-          setResults([]);
-          toast.info("Query executed with no results");
+          setResults([{ message: "Query executed with no results" }]);
         }
       })
       .catch((error) => {
-        setResults([{ error: error.message }]);
-        toast.error("Query failed: " + error.message);
+        const apiError = error.response?.data;
+        const errorMessage = typeof apiError === 'string' ? apiError : 
+                           apiError?.message || 
+                           error.message || 
+                           "An unknown error occurred";
+        setResults([{ error: errorMessage }]);
       })
       .finally(() => {
         setIsLoading(false);

@@ -38,10 +38,16 @@ function DatabaseTypes() {
             (databaseType) => databaseType.id !== id
           );
           setDatabaseTypes(newDatabaseTypes);
+          toast.success("Database type deleted successfully!");
         }
       })
-      .catch((error) => {
-        toast.error(error.toString(), {
+      .catch((error: any) => {
+        const apiError = error.response?.data;
+        const errorMessage = typeof apiError === 'string' ? apiError : 
+                           apiError?.message || 
+                           error.message || 
+                           "An unknown error occurred";
+        toast.error(errorMessage, {
           autoClose: false,
         });
       });
@@ -188,6 +194,7 @@ function AddDatabaseTypeModal({
         };
         setDatabaseTypes([...databaseTypes, newType]);
         handleClose();
+        toast.success("Database type added successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -266,6 +273,7 @@ function UpdateDatabaseTypeModal({
 
         setDatabaseTypes(newTypes);
         handleClose();
+        toast.success("Database type updated successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";

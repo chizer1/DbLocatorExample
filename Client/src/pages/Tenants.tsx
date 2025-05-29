@@ -38,10 +38,16 @@ function Tenants() {
             (tenant) => tenant.id !== id
           );
           setTenants(newTenants);
+          toast.success("Tenant deleted successfully!");
         }
       })
-      .catch((error) => {
-        toast.error(error.toString(), {
+      .catch((error: any) => {
+        const apiError = error.response?.data;
+        const errorMessage = typeof apiError === 'string' ? apiError : 
+                           apiError?.message || 
+                           error.message || 
+                           "An unknown error occurred";
+        toast.error(errorMessage, {
           autoClose: false,
         });
       });
@@ -207,6 +213,7 @@ function AddTenantModal({
         };
         setTenants([...tenants, newTenant]);
         handleClose();
+        toast.success("Tenant added successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
@@ -310,6 +317,7 @@ function UpdateTenantModal({
 
         setTenants(newTenants);
         handleClose();
+        toast.success("Tenant updated successfully!");
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
