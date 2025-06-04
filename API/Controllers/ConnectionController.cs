@@ -12,7 +12,7 @@ public class ConnectionController(Locator dbLocator) : ControllerBase
     [HttpPost("addConnection")]
     public async Task<int> AddConnection([FromBody] AddConnectionRequest request)
     {
-        return await dbLocator.AddConnection(request.TenantId, request.DatabaseId);
+        return await dbLocator.CreateConnection(request.TenantId, request.DatabaseId);
     }
 
     [HttpGet("getConnections")]

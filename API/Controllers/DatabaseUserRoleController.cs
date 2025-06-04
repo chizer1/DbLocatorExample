@@ -11,7 +11,7 @@ public class DatabaseUserRoleController(Locator dbLocator) : ControllerBase
     [HttpPost("addDatabaseUserRole")]
     public async Task AddDatabaseUserRole([FromBody] AddDatabaseUserRoleRequest request)
     {
-        await dbLocator.AddDatabaseUserRole(request.DatabaseUserId, request.DatabaseRoleId);
+        await dbLocator.CreateDatabaseUserRole(request.DatabaseUserId, request.DatabaseRoleId);
     }
 
     [HttpDelete("deleteDatabaseUserRole")]

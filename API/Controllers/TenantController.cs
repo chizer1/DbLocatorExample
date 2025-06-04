@@ -12,7 +12,7 @@ public class TenantController(Locator dbLocator) : ControllerBase
     [HttpPost("addTenant")]
     public async Task<int> AddTenant([FromBody] AddTenantRequest request)
     {
-        return await dbLocator.AddTenant(
+        return await dbLocator.CreateTenant(
             request.TenantName,
             request.TenantCode,
             request.TenantStatus

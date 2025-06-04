@@ -13,10 +13,11 @@ public class DatabaseUserController(Locator dbLocator) : ControllerBase
     [HttpPost("addDatabaseUser")]
     public async Task<int> AddDatabaseUser([FromBody] AddDatabaseUser addDatabaseUser)
     {
-        return await dbLocator.AddDatabaseUser(
+        return await dbLocator.CreateDatabaseUser(
             [.. addDatabaseUser.DatabaseIds],
             addDatabaseUser.UserName,
-            addDatabaseUser.UserPassword
+            addDatabaseUser.UserPassword,
+            true
         );
     }
 
@@ -25,9 +26,10 @@ public class DatabaseUserController(Locator dbLocator) : ControllerBase
     {
         await dbLocator.UpdateDatabaseUser(
             request.DatabaseUserId,
-            [.. request.DatabaseIds],
             request.UserName,
-            request.UserPassword
+            request.UserPassword,
+            [.. request.DatabaseIds],
+            true
         );
     }
 
@@ -40,6 +42,6 @@ public class DatabaseUserController(Locator dbLocator) : ControllerBase
     [HttpDelete("deleteDatabaseUser")]
     public async Task DeleteDatabaseUser(int databaseUserId)
     {
-        await dbLocator.DeleteDatabaseUser(databaseUserId);
+        await dbLocator.DeleteDatabaseUser(databaseUserId, true);
     }
 }

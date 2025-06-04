@@ -12,7 +12,7 @@ public class DatabaseController(Locator dbLocator) : ControllerBase
     [HttpPost("addDatabase")]
     public async Task<int> AddDatabase([FromBody] AddDatabaseRequest request)
     {
-        return await dbLocator.AddDatabase(
+        return await dbLocator.CreateDatabase(
             request.DatabaseName,
             request.DatabaseServerId,
             request.DatabaseTypeId,
@@ -34,7 +34,9 @@ public class DatabaseController(Locator dbLocator) : ControllerBase
             request.DatabaseName,
             request.DatabaseServerId,
             request.DatabaseTypeId,
-            request.DatabaseStatus
+            false,
+            request.DatabaseStatus,
+            true
         );
     }
 

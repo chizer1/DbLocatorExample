@@ -12,7 +12,7 @@ public class DatabaseTypeController(Locator dbLocator) : ControllerBase
     [HttpPost("addDatabaseType")]
     public async Task<int> AddDatabaseType([FromBody] AddDatabaseTypeRequest request)
     {
-        return await dbLocator.AddDatabaseType(request.DatabaseTypeName);
+        return await dbLocator.CreateDatabaseType(request.DatabaseTypeName);
     }
 
     [HttpGet("getDatabaseTypes")]

@@ -40,7 +40,7 @@ export interface AddDatabaseTypeRequest {
 export interface AddDatabaseUser {
   databaseIds: number[] | null;
   userName: string | null;
-  userPassword?: string | null;
+  userPassword: string | null;
 }
 
 export interface AddDatabaseUserRoleRequest {

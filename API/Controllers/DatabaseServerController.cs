@@ -12,12 +12,12 @@ public class DatabaseServerController(Locator dbLocator) : ControllerBase
     [HttpPost("addDatabaseServer")]
     public async Task<int> AddDatabaseServer([FromBody] AddDatabaseServerRequest request)
     {
-        return await dbLocator.AddDatabaseServer(
+        return await dbLocator.CreateDatabaseServer(
             request.DatabaseServerName,
-            request.IsLinkedServer,
             request.DatabaseServerIpAddress,
             request.DatabaseServerHostName,
-            request.DatabaseServerFullyQualifiedDomainName
+            request.DatabaseServerFullyQualifiedDomainName,
+            request.IsLinkedServer
         );
     }
 
@@ -32,11 +32,8 @@ public class DatabaseServerController(Locator dbLocator) : ControllerBase
     {
         await dbLocator.UpdateDatabaseServer(
             request.DatabaseServerId,
-            request.DatabaseServerName,
-            request.DatabaseServerHostName,
             request.DatabaseServerIpAddress,
-            request.DatabaseServerFullyQualifiedDomainName,
-            false
+            request.DatabaseServerFullyQualifiedDomainName
         );
     }
 
