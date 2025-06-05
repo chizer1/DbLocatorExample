@@ -156,6 +156,7 @@ export interface UpdateDatabaseServerRequest {
   databaseServerIpAddress: string | null;
   databaseServerHostName: string | null;
   databaseServerFullyQualifiedDomainName: string | null;
+  isLinkedServer?: boolean;
 }
 
 export interface UpdateDatabaseTypeRequest {
